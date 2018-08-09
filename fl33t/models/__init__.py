@@ -95,7 +95,7 @@ class Device(BaseModel, OneBuildMixin, OneFleetMixin):
         'session_token': ''
     }
 
-    def update_available(self):
+    def upgrade_available(self):
         """Returns the available firmware update, if there is one"""
         if self.build_id:
             return self._client.has_firmware_update(self.device_id, self.build_id)
