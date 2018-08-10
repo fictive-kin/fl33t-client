@@ -2,6 +2,7 @@
 import base64
 import json
 import logging
+import os
 import random
 import requests
 import string
@@ -13,7 +14,8 @@ from fl33t.exceptions import(
     UnprivilegedToken,
     CommunicationError
 )
- 
+
+from fl33t.models.base import BaseModel
 from fl33t.models import (
     Build,
     Device,
@@ -21,6 +23,8 @@ from fl33t.models import (
     Train,
     Session
 )
+
+from fl33t.utils import md5
 
 logger = logging.getLogger(__name__)
 
@@ -65,6 +69,22 @@ class Fl33tClient:
                 self.default_query_limit = 25
         else:
             self.default_query_limit = 25
+
+
+    def Build(self, **kwargs):
+        return Build(client=self, **kwargs)
+
+    def Device(self, **kwargs):
+        return Device(client=self, **kwargs)
+
+    def Fleet(self, **kwargs):
+        return Fleet(client=self, **kwargs)
+
+    def Train(self, **kwargs):
+        return Train(client=self, **kwargs)
+
+    def Session(self, **kwargs):
+        return Session(client=self, **kwargs)
 
 
     def _build_offset_limit(self, offset=None, limit=None):
@@ -114,15 +134,28 @@ class Fl33tClient:
         headers = kwargs.get('headers') if kwargs.get('headers') else {}
         if 'Authorization' not in headers:
             headers['Authorization'] = 'Bearer {}'.format(self.token)
+        if 'Content-Type' not in headers:
+            headers['Content-Type'] = 'application/json'
+        if 'Accept' not in headers:
+            headers['Accept'] = 'application/json'
         kwargs['headers'] = headers
 
+        data = kwargs.pop('data', None)
+        if data and isinstance(data, BaseModel):
+                data = data.to_json()
+
+        logger.debug('Sending {} request with payload: {}'.format(
+            method, data))
         method = getattr(requests, method.lower())
         try:
-            result = method(url, **kwargs)
+            result = method(url, data=data, **kwargs)
             result.raise_for_status()
         except requests.exceptions.HTTPError as e:
             logger.exception(e)
             pass
+
+        if not result:
+            return False
 
         if result.status_code == 403:
             raise UnprivilegedToken(url)
@@ -130,7 +163,7 @@ class Fl33tClient:
         return result
 
 
-    def list_sessions(self, offset=None, limit=None, headers=None):
+    def list_sessions(self, offset=None, limit=None):
         """
         List API Sessions
         """
@@ -138,7 +171,7 @@ class Fl33tClient:
             self.team_id)))
         params = self._build_offset_limit(offset=offset, limit=limit)
 
-        result = self.get(url, params=params, headers=headers)
+        result = self.get(url, params=params)
 
         for item in result.json()['sessions']:
             yield Session(client=self, **item)
@@ -152,7 +185,7 @@ class Fl33tClient:
         return self.get_session(self.token)
 
 
-    def get_session(self, session_token, headers=None):
+    def get_session(self, session_token):
         """
         Return information about a specific session_token
         """
@@ -160,7 +193,7 @@ class Fl33tClient:
         url = "/".join((self.base_uri, 'team/{}/session/{}'.format(
             self.team_id, session_token)))
 
-        result = self.get(url, headers=headers)
+        result = self.get(url)
         if result:
             if result.status_code == 400:
                 raise InvalidSessionIdError()
@@ -173,7 +206,7 @@ class Fl33tClient:
         return False
 
 
-    def get_fleet(self, fleet_id, headers=None):
+    def get_fleet(self, fleet_id):
         """
         Return information about a specific fleet
         """
@@ -181,7 +214,7 @@ class Fl33tClient:
         url = "/".join((self.base_uri, 'team/{}/fleet/{}'.format(
             self.team_id, fleet_id)))
 
-        result = self.get(url, headers=headers)
+        result = self.get(url)
         if result:
             if 'fleet' in result.json():
                 fleet = result.json()['fleet']
@@ -192,7 +225,7 @@ class Fl33tClient:
         return False
 
 
-    def get_build(self, build_id, train_id, headers=None):
+    def get_build(self, build_id, train_id):
         """
         Return information about a specific build
         """
@@ -200,7 +233,7 @@ class Fl33tClient:
         url = "/".join((self.base_uri, 'team/{}/train/{}/build/{}'.format(
             self.team_id, train_id, build_id)))
 
-        result = self.get(url, headers=headers)
+        result = self.get(url)
         if result:
             if 'build' in result.json():
                 build = result.json()['build']
@@ -212,7 +245,7 @@ class Fl33tClient:
         return False
 
 
-    def get_train(self, train_id, headers=None):
+    def get_train(self, train_id):
         """
         Return information about a specific train
         """
@@ -220,7 +253,7 @@ class Fl33tClient:
         url = "/".join((self.base_uri, 'team/{}/train/{}'.format(
             self.team_id, train_id)))
 
-        result = self.get(url, headers=headers)
+        result = self.get(url)
         if result:
             if 'train' in result.json():
                 train = result.json()['train']
@@ -230,7 +263,7 @@ class Fl33tClient:
         return False
 
 
-    def get_device(self, device_id, headers=None):
+    def get_device(self, device_id):
         """
         Get a device by ID from Fleet.
         """
@@ -238,7 +271,7 @@ class Fl33tClient:
         url = "/".join((self.base_uri, 'team/{}/device/{}'.format(
             self.team_id, device_id)))
 
-        result = self.get(url, headers=headers)
+        result = self.get(url)
         if result:
             if result.status_code == 400:
                 raise InvalidDeviceIdError()
@@ -250,7 +283,7 @@ class Fl33tClient:
         return False
 
 
-    def create_device_id(self, fleet_id, device_id=None, name=None, headers=None):
+    def create_device_id(self, fleet_id, device_id=None, name=None):
         """
         Create a device ID in Fleet.
 
@@ -269,7 +302,7 @@ class Fl33tClient:
             }
         }
 
-        result = self.post(url, json=data, headers=headers)
+        result = self.post(url, data=data)
         if result:
             if result.status_code == 409:
                 raise DuplicateDeviceIdError()
@@ -281,13 +314,13 @@ class Fl33tClient:
         return False
 
 
-    def delete_device_id(self, device_id, headers=None):
+    def delete_device_id(self, device_id):
         """Delete a device by device ID in Fleet."""
 
         url = "/".join((self.base_uri, 'team/{}/device/{}'.format(
             self.team_id, device_id)))
 
-        result = self.delete(url, headers=headers)
+        result = self.delete(url)
         if result:
             if result.status_code == 400:
                 raise InvalidDeviceIdError()
@@ -299,7 +332,7 @@ class Fl33tClient:
         return False
 
 
-    def has_firmware_update(self, device_id, currently_installed_id=None, headers=None):
+    def has_firmware_update(self, device_id, currently_installed_id=None):
         """
         Does this device have pending firmware updates?
 
@@ -316,7 +349,7 @@ class Fl33tClient:
                 'installed_build_id': currently_installed_id
             }
 
-        result = self.get(url, params=params, headers=headers)
+        result = self.get(url, params=params)
         if result:
             # No update available.
             if result.status_code == 204:
@@ -329,7 +362,7 @@ class Fl33tClient:
         return False
 
 
-    def list_fleets(self, train_id=None, offset=None, limit=None, headers=None):
+    def list_fleets(self, train_id=None, offset=None, limit=None):
         """Get all fleets from fl33t."""
 
         url = "/".join((self.base_uri, 'team/{}/fleets'.format(self.team_id)))
@@ -337,7 +370,7 @@ class Fl33tClient:
         if train_id:
             params['train_id'] = train_id
 
-        result = self.get(url, params=params, headers=headers)
+        result = self.get(url, params=params)
         if not result or 'fleets' not in result.json():
             logger.exception('Could not fetch fleets')
             return False
@@ -346,13 +379,13 @@ class Fl33tClient:
             yield Fleet(client=self, **item)
 
 
-    def list_trains(self, offset=None, limit=None, headers=None):
+    def list_trains(self, offset=None, limit=None):
         """Get all trains from fl33t."""
 
         url = "/".join((self.base_uri, 'team/{}/trains'.format( self.team_id)))
         params = self._build_offset_limit(offset=offset, limit=limit)
 
-        result = self.get(url, params=params, headers=headers)
+        result = self.get(url, params=params)
         if not result or 'trains' not in result.json():
             logger.exception('Could not fetch trains')
             return False
@@ -361,7 +394,7 @@ class Fl33tClient:
             yield Train(client=self, **item)
 
 
-    def list_devices(self, fleet_id=None, offset=None, limit=None, headers=None):
+    def list_devices(self, fleet_id=None, offset=None, limit=None):
         """Get all devices from fl33t."""
 
         url = "/".join((self.base_uri, 'team/{}/devices'.format(self.team_id)))
@@ -369,7 +402,7 @@ class Fl33tClient:
         if fleet_id:
             params['fleet_id'] = fleet_id
 
-        result = self.get(url, params=params, headers=headers)
+        result = self.get(url, params=params)
         if not result or 'devices' not in result.json():
             logger.exception('Could not fetch devices')
             return False
@@ -378,17 +411,76 @@ class Fl33tClient:
             yield Device(client=self, **item)
 
 
-    def list_builds(self, train_id, offset=None, limit=None, headers=None):
+    def list_builds(self, train_id, offset=None, limit=None):
         """Get all builds from fl33t, by train id."""
 
         url = "/".join((self.base_uri, 'team/{}/train/{}/builds'.format(
             self.team_id, train_id)))
         params = self._build_offset_limit(offset=offset, limit=limit)
 
-        result = self.get(url, params=params, headers=headers)
+        result = self.get(url, params=params)
         if not result or 'builds' not in result.json():
             logger.exception('Could not fetch builds for train: {}'.format(train_id))
             return False
 
         for item in result.json()['builds']:
             yield Build(client=self, **item)
+
+
+    def build_update(self, build):
+        pass
+
+
+    def build_delete(self, build):
+        """Delete a build from a Fl33t train"""
+
+        url = "/".join((self.base_uri, 'team/{}/train/{}/build/{}'.format(
+            self.team_id, build.train_id, build.build_id)))
+
+        result = self.delete(url)
+        return result.status_code == 204
+
+
+    def build_create(self, build):
+        """Create a new build record in fl33t and upload the new build file"""
+
+        url = "/".join((self.base_uri, 'team/{}/train/{}/build'.format(
+            self.team_id, build.train_id)))
+
+        data = {
+            'build': build.to_json()
+        }
+
+        result = self.post(url, data=build)
+        if not result or 'build' not in result.json():
+            logger.exception(
+                'Could not create build for: {}'.format(build.version))
+            return False
+
+        build_data = result.json()['build']
+        for key in build_data.keys():
+            setattr(build, key, build_data[key])
+
+        if not build.upload_url:
+            logger.exception(
+                'Build creation worked, but no upload_url was'
+                ' provided by fl33t for build: {}'.format(build.version))
+            return build
+
+        headers = {
+            'Content-Type': 'application/octet-stream',
+            'Content-Disposition': 'attachment; filename="{}"'.format(
+                build.filename)
+        }
+        with open(build.fullpath, 'rb') as build_file:
+            response = requests.put(
+                build.upload_url,
+                data=build_file.read(),
+                headers=headers)
+
+            if not response or response.status_code != 200:
+                logger.exception(
+                    'Failed to upload build file: {}'.format(build.version))
+                return False
+
+        return build

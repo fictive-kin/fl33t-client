@@ -1,5 +1,6 @@
 
 import datetime
+import os
 
 from fl33t.models.base import BaseModel
 from fl33t.models.mixins import (
@@ -10,6 +11,7 @@ from fl33t.models.mixins import (
     OneFleetMixin,
     ManyFleetsMixin
 )
+from fl33t.utils import md5
 
 class Session(BaseModel):
     _booleans = ['admin', 'device', 'provisioning', 'readonly', 'upload']
@@ -140,6 +142,21 @@ class Build(BaseModel, OneTrainMixin):
         'upload_url': '',
         'version': ''
     }
+
+    fullpath = None
+
+    def __init__(self, **kwargs):
+        # need to have both the full path, if provided and the basename to
+        # the build file
+        if 'filename' in kwargs and kwargs['filename']:
+            self.fullpath = kwargs.get('filename')
+            kwargs['filename'] = os.path.basename(self.fullpath)
+            if 'md5sum' not in kwargs:
+                kwargs['md5sum'] = md5(self.fullpath)
+            if 'size' not in kwargs:
+                kwargs['size'] = os.path.getsize(self.fullpath)
+
+        super().__init__(**kwargs)
 
     def __str__(self):
         return ('Build {}: {} (Status: {}, Released: {}, Train: {}, Size: {},'
