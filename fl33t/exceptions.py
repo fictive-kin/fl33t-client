@@ -3,12 +3,24 @@ class DuplicateDeviceIdError(Exception):
     """A device by that ID already exists in Fleet."""
     pass
 
+class InvalidFleetIdError(Exception):
+    """No fleet by that ID exists in Fleet."""
+    pass
+
+class InvalidBuildIdError(Exception):
+    """No build by that ID exists in Fleet."""
+    pass
+
+class InvalidTrainIdError(Exception):
+    """No train by that ID exists in Fleet."""
+    pass
+
 class InvalidDeviceIdError(Exception):
-    """A device by that ID already exists in Fleet."""
+    """No device by that ID exists in Fleet."""
     pass
 
 class InvalidSessionIdError(Exception):
-    """A device by that ID already exists in Fleet."""
+    """No session by that ID exists in Fleet."""
     pass
 
 

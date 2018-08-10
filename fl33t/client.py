@@ -11,6 +11,9 @@ from fl33t.exceptions import(
     DuplicateDeviceIdError,
     InvalidDeviceIdError,
     InvalidSessionIdError,
+    InvalidBuildIdError,
+    InvalidFleetIdError,
+    InvalidTrainIdError,
     UnprivilegedToken,
     CommunicationError
 )
@@ -144,11 +147,15 @@ class Fl33tClient:
         if data and isinstance(data, BaseModel):
                 data = data.to_json()
 
+        params = kwargs.pop('params', None)
+
+        logger.debug('Sending {} request with params: {}'.format(
+            method, params))
         logger.debug('Sending {} request with payload: {}'.format(
             method, data))
         method = getattr(requests, method.lower())
         try:
-            result = method(url, data=data, **kwargs)
+            result = method(url, params=params, data=data, **kwargs)
             result.raise_for_status()
         except requests.exceptions.HTTPError as e:
             logger.exception(e)
@@ -235,6 +242,9 @@ class Fl33tClient:
 
         result = self.get(url)
         if result:
+            if result.status_code == 404:
+                raise InvalidBuildIdError()
+
             if 'build' in result.json():
                 build = result.json()['build']
                 return Build(client=self, **build)
@@ -411,12 +421,14 @@ class Fl33tClient:
             yield Device(client=self, **item)
 
 
-    def list_builds(self, train_id, offset=None, limit=None):
+    def list_builds(self, train_id, version=None, offset=None, limit=None):
         """Get all builds from fl33t, by train id."""
 
         url = "/".join((self.base_uri, 'team/{}/train/{}/builds'.format(
             self.team_id, train_id)))
         params = self._build_offset_limit(offset=offset, limit=limit)
+        if version:
+            params['version'] = version
 
         result = self.get(url, params=params)
         if not result or 'builds' not in result.json():
