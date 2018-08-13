@@ -31,5 +31,5 @@ def test_delete_build(fl33t_client):
         mock.get(url, text=json.dumps(get_build_response))
         mock.delete(url, [{'status_code': 204}])
 
-        build = fl33t_client.get_build(build_id, train_id)
+        build = fl33t_client.get_build(train_id, build_id)
         assert build.delete() == True

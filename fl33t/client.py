@@ -229,7 +229,7 @@ class Fl33tClient:  # pylint: disable=too-many-public-methods
         LOGGER.exception('Could not retrieve fleet: {}'.format(fleet_id))
         return False
 
-    def get_build(self, build_id, train_id):
+    def get_build(self, train_id, build_id):
         """
         Return information about a specific build
         """
@@ -429,7 +429,15 @@ class Fl33tClient:  # pylint: disable=too-many-public-methods
 
     def build_update(self, build):
         """Update a build"""
-        pass
+
+        url = "/".join((self.base_uri, 'team/{}/train/{}/build/{}'.format(
+            self.team_id, build.train_id, build.build_id)))
+
+        result = self.put(url, data=build)
+        if not result or result.status_code != 204:
+            return False
+
+        return build
 
     def build_delete(self, build):
         """Delete a build from a Fl33t train"""
