@@ -3,12 +3,13 @@
 Models
 
 All the models in use by Fl33t
+
 """
 
 import datetime
-import os
 
 from fl33t.models.base import BaseModel
+from fl33t.models.build import Build # noqa
 from fl33t.models.mixins import (
     OneBuildMixin,
     ManyBuildsMixin,
@@ -17,7 +18,6 @@ from fl33t.models.mixins import (
     OneFleetMixin,
     ManyFleetsMixin
 )
-from fl33t.utils import md5
 
 
 class Session(BaseModel):
@@ -137,71 +137,6 @@ class Device(BaseModel, OneBuildMixin, OneFleetMixin):
                     self.fleet_id,
                     self.build_id,
                     self.checkin_tstamp
-                    )
-                )
-
-
-class Build(BaseModel, OneTrainMixin):
-    """The Fl33t Build model"""
-
-    _booleans = ['released']
-    _enums = {
-        'status': ['created', 'failed', 'available']
-    }
-    _ints = ['size']
-    _timestamps = ['upload_tstamp']
-
-    _defaults = {
-        'build_id': '',
-        'download_url': '',
-        'filename': '',
-        'md5sum': '',
-        'released': False,
-        'size': 0,
-        'status': '',
-        'train_id': '',
-        'upload_tstamp': datetime.datetime.utcnow(),
-        'upload_url': '',
-        'version': ''
-    }
-
-    fullpath = None
-
-    def __init__(self, **kwargs):
-        # need to have both the full path, if provided and the basename to
-        # the build file
-        if 'filename' in kwargs and kwargs['filename']:
-            self.fullpath = kwargs.get('filename')
-            kwargs['filename'] = os.path.basename(self.fullpath)
-            if 'md5sum' not in kwargs:
-                kwargs['md5sum'] = md5(self.fullpath)
-            if 'size' not in kwargs:
-                kwargs['size'] = os.path.getsize(self.fullpath)
-
-        super().__init__(**kwargs)
-
-    def __str__(self):
-        return ('Build {}: {} (Status: {}, Released: {}, Train: {}, Size: {},'
-                ' Uploaded: {})'.format(
-                    self.build_id,
-                    self.version,
-                    self.status,
-                    'Released' if self.released else 'Unreleased',
-                    self.train_id,
-                    self.size,
-                    self.upload_tstamp
-                    )
-                )
-
-    def __repr__(self):
-        return ('<Build id={} version={} md5sum={} size={} train_id={} '
-                'uploaded={}>'.format(
-                    self.build_id,
-                    self.version,
-                    self.md5sum,
-                    self.size,
-                    self.train_id,
-                    self.upload_tstamp
                     )
                 )
 

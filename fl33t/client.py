@@ -93,6 +93,10 @@ class Fl33tClient:  # pylint: disable=too-many-public-methods
         """Return a client connected Session"""
         return Session(client=self, **kwargs)
 
+    def base_team_url(self):
+        """Returns the base team URL for this client"""
+        return '/'.join((self.base_uri, 'team/{}'.format(self.team_id)))
+
     def _build_offset_limit(self, offset=None, limit=None):
         """Get the offset/limit query params allowing defaults"""
         if not offset or int(offset) < 1:
@@ -426,64 +430,3 @@ class Fl33tClient:  # pylint: disable=too-many-public-methods
 
         for item in result.json()['builds']:
             yield Build(client=self, **item)
-
-    def build_update(self, build):
-        """Update a build"""
-
-        url = "/".join((self.base_uri, 'team/{}/train/{}/build/{}'.format(
-            self.team_id, build.train_id, build.build_id)))
-
-        result = self.put(url, data=build)
-        if not result or result.status_code != 204:
-            return False
-
-        return build
-
-    def build_delete(self, build):
-        """Delete a build from a Fl33t train"""
-
-        url = "/".join((self.base_uri, 'team/{}/train/{}/build/{}'.format(
-            self.team_id, build.train_id, build.build_id)))
-
-        result = self.delete(url)
-        return result.status_code == 204
-
-    def build_create(self, build):
-        """Create a new build record in fl33t and upload the new build file"""
-
-        url = "/".join((self.base_uri, 'team/{}/train/{}/build'.format(
-            self.team_id, build.train_id)))
-
-        result = self.post(url, data=build)
-        if not result or 'build' not in result.json():
-            LOGGER.exception(
-                'Could not create build for: {}'.format(build.version))
-            return False
-
-        build_data = result.json()['build']
-        for key in build_data.keys():
-            setattr(build, key, build_data[key])
-
-        if not build.upload_url:
-            LOGGER.exception(
-                'Build creation worked, but no upload_url was'
-                ' provided by fl33t for build: {}'.format(build.version))
-            return build
-
-        headers = {
-            'Content-Type': 'application/octet-stream',
-            'Content-Disposition': 'attachment; filename="{}"'.format(
-                build.filename)
-        }
-        with open(build.fullpath, 'rb') as build_file:
-            response = requests.put(
-                build.upload_url,
-                data=build_file.read(),
-                headers=headers)
-
-            if not response or response.status_code != 200:
-                LOGGER.exception(
-                    'Failed to upload build file: {}'.format(build.version))
-                return False
-
-        return build

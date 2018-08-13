@@ -6,6 +6,7 @@ Has all common methods for Fl33t models
 
 import datetime
 import json
+import logging
 
 from dateutil import parser
 
@@ -26,6 +27,7 @@ class BaseModel():
     def __init__(self, **kwargs):
         self._client = kwargs.pop('client', None)
 
+        self.logger = logging.getLogger(__name__)
         for key in self._defaults.keys():
             if key not in kwargs:
                 self._data[key] = self._defaults[key]
