@@ -15,7 +15,7 @@ from fl33t.exceptions import(
     InvalidFleetIdError,
     InvalidTrainIdError,
     UnprivilegedToken,
-    CommunicationError
+    Fl33tApiException
 )
 
 from fl33t.models.base import BaseModel
@@ -166,6 +166,9 @@ class Fl33tClient:
 
         if result.status_code == 403:
             raise UnprivilegedToken(url)
+
+        if result.status_code >= 500:
+            raise Fl33tApiException(result.status_code, result.text)
 
         return result
 
