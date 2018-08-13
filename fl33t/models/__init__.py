@@ -1,3 +1,9 @@
+"""
+
+Models
+
+All the models in use by Fl33t
+"""
 
 import datetime
 import os
@@ -13,7 +19,10 @@ from fl33t.models.mixins import (
 )
 from fl33t.utils import md5
 
+
 class Session(BaseModel):
+    """The Fl33t Session model"""
+
     _booleans = ['admin', 'device', 'provisioning', 'readonly', 'upload']
 
     _defaults = {
@@ -27,6 +36,7 @@ class Session(BaseModel):
     }
 
     def priv(self):
+        """Return a human readable privilege"""
         if self.admin:
             return 'admin'
         if self.device:
@@ -37,6 +47,7 @@ class Session(BaseModel):
             return 'upload'
         if self.readonly:
             return 'readonly'
+        return 'unprivileged'
 
     def __str__(self):
         return '{}:{}:{}'.format(
@@ -54,6 +65,8 @@ class Session(BaseModel):
 
 
 class Fleet(BaseModel, OneTrainMixin, OneBuildMixin, ManyDevicesMixin):
+    """The Fl33t Fleet model"""
+
     _booleans = ['unreleased']
     _ints = ['size']
 
@@ -76,16 +89,19 @@ class Fleet(BaseModel, OneTrainMixin, OneBuildMixin, ManyDevicesMixin):
         )
 
     def __repr__(self):
-        return '<Fleet id={} name={} train_id={} unreleased={} size={}>'.format(
-            self.fleet_id,
-            self.name,
-            self.train_id,
-            self.unreleased,
-            self.size
-        )
+        return ('<Fleet id={} name={} train_id={} unreleased={} '
+                'size={}>'.format(
+                    self.fleet_id,
+                    self.name,
+                    self.train_id,
+                    self.unreleased,
+                    self.size
+                    )
+                )
 
 
 class Device(BaseModel, OneBuildMixin, OneFleetMixin):
+    """The Fl33t Device model"""
     _timestamps = ['checkin_tstamp']
 
     _defaults = {
@@ -100,7 +116,9 @@ class Device(BaseModel, OneBuildMixin, OneFleetMixin):
     def upgrade_available(self):
         """Returns the available firmware update, if there is one"""
         if self.build_id:
-            return self._client.has_firmware_update(self.device_id, self.build_id)
+            return self._client.has_firmware_update(
+                self.device_id,
+                self.build_id)
         return self._client.has_firmware_update(self.device_id)
 
     def __str__(self):
@@ -112,16 +130,20 @@ class Device(BaseModel, OneBuildMixin, OneFleetMixin):
         )
 
     def __repr__(self):
-        return '<Device id={} name={} fleet_id={} build_id={}, last_seen={})'.format(
-            self.device_id,
-            self.name,
-            self.fleet_id,
-            self.build_id,
-            self.checkin_tstamp
-        )
+        return ('<Device id={} name={} fleet_id={} build_id={} '
+                'last_seen={}>'.format(
+                    self.device_id,
+                    self.name,
+                    self.fleet_id,
+                    self.build_id,
+                    self.checkin_tstamp
+                    )
+                )
 
 
 class Build(BaseModel, OneTrainMixin):
+    """The Fl33t Build model"""
+
     _booleans = ['released']
     _enums = {
         'status': ['created', 'failed', 'available']
@@ -161,27 +183,32 @@ class Build(BaseModel, OneTrainMixin):
     def __str__(self):
         return ('Build {}: {} (Status: {}, Released: {}, Train: {}, Size: {},'
                 ' Uploaded: {})'.format(
-            self.build_id,
-            self.version,
-            self.status,
-            'Released' if self.released else 'Unreleased',
-            self.train_id,
-            self.size,
-            self.upload_tstamp
-        ))
+                    self.build_id,
+                    self.version,
+                    self.status,
+                    'Released' if self.released else 'Unreleased',
+                    self.train_id,
+                    self.size,
+                    self.upload_tstamp
+                    )
+                )
 
     def __repr__(self):
-        return '<Build id={} version={} md5sum={} size={} train_id={} uploaded={}'.format(
-            self.build_id,
-            self.version,
-            self.md5sum,
-            self.size,
-            self.train_id,
-            self.upload_tstamp
-        )
+        return ('<Build id={} version={} md5sum={} size={} train_id={} '
+                'uploaded={}>'.format(
+                    self.build_id,
+                    self.version,
+                    self.md5sum,
+                    self.size,
+                    self.train_id,
+                    self.upload_tstamp
+                    )
+                )
 
 
 class Train(BaseModel, ManyFleetsMixin, ManyBuildsMixin):
+    """The Fl33t Train model"""
+
     _timestamps = ['upload_tstamp']
 
     _defaults = {

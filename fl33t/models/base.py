@@ -1,12 +1,21 @@
+"""
+BaseModel
+
+Has all common methods for Fl33t models
+"""
 
 import datetime
 import json
 
 from dateutil import parser
 
+from fl33t.exceptions import Fl33tClientMissing
 from fl33t.utils import ExtendedEncoder
 
+
 class BaseModel():
+    """The base model from which all Fl33t models should be extended"""
+
     _data = {}
     _booleans = []
     _ints = []
@@ -24,29 +33,31 @@ class BaseModel():
             else:
                 self.set_data(key, kwargs[key])
 
-
     def to_json(self):
-        return json.dumps(
-                   {
-                       self.__class__.__name__.lower(): self._data
-                   },
-                   cls=ExtendedEncoder)
+        """Dumps this model as JSON for use in API calls"""
 
+        return json.dumps(
+            {
+                self.__class__.__name__.lower(): self._data
+            },
+            cls=ExtendedEncoder)
 
     def __getattr__(self, key, default=None):
         if key not in self._data:
             if not default:
-                raise AttributeError('{} is not a valid attribute of {}'.format(
-                          key, self.__class__.__name__))
+                raise AttributeError(
+                    '{} is not a valid attribute of {}'.format(
+                        key, self.__class__.__name__))
             return default
 
         return self._data.get(key, default)
 
-
     def set_data(self, key, value):
+        """Sets a value within the model's allowed properties"""
+
         if key not in self._defaults:
             raise AttributeError('{} is not a valid attribute of {}'.format(
-                      key, self.__class__.__name__))
+                key, self.__class__.__name__))
         if not value:
             self._data[key] = value
 
@@ -66,7 +77,7 @@ class BaseModel():
                     self._data[key] = value
                 else:
                     self._data[key] = parser.parse(value)
-            except:
+            except Exception:
                 raise ValueError('{} MUST be an instance of'
                                  ' datetime.datetime or be machine'
                                  ' parsable'.format(key))
@@ -80,24 +91,27 @@ class BaseModel():
         else:
             self._data[key] = value
 
-
     def create(self):
+        """Calls API client create method"""
+
         if not self._client:
             raise Fl33tClientMissing()
         method = getattr(self._client,
                          '{}_create'.format(self.__class__.__name__.lower()))
         return method(self)
 
-
     def delete(self):
+        """Calls API client delete method"""
+
         if not self._client:
             raise Fl33tClientMissing()
         method = getattr(self._client,
                          '{}_delete'.format(self.__class__.__name__.lower()))
         return method(self)
 
-
     def update(self):
+        """Calls API client update method"""
+
         if not self._client:
             raise Fl33tClientMissing()
         method = getattr(self._client,

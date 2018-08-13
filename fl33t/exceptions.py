@@ -1,3 +1,9 @@
+"""
+Exceptions
+
+All exceptions used by the fl33t client
+"""
+
 
 class DuplicateDeviceIdError(Exception):
     """A device by that ID already exists in Fleet."""
@@ -31,15 +37,22 @@ class InvalidSessionIdError(Exception):
 
 class UnprivilegedToken(Exception):
     """The token in use is not privileged for the URL used"""
+
+    _message = 'The token does not have enough privilege to view: {}'
+
     def __init__(self, url):
-        message = 'The token does not have enough privilege to view: {}'.format(
-                url)
-        super().__init__(message)
+        super().__init__(self._message.format(url))
 
 
 class Fl33tApiException(Exception):
     """The Fl33t API returned an exception handling our request"""
+
+    _message = 'The Fl33t API returned an error for: {} : {} - {}'
+
     def __init__(self, url, status_code, message):
-        message = 'The Fl33t API returned an error for: {} : {} - {}'.format(
-                url, status_code, message)
-        super().__init__(message)
+        super().__init__(self._message.format(url, status_code, message))
+
+
+class Fl33tClientMissing(Exception):
+    """A model has been instantiated without providing an API client"""
+    pass
