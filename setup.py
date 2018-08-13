@@ -12,7 +12,7 @@ setup(
     maintainer_email='systems@fictivekin.com',
     packages=['fl33t'],
     install_requires=[
-        'dateutil',
+        'python-dateutil',
         'pytz',
         'requests',
     ],
