@@ -1,0 +1,7 @@
+coverage
+flake8
+requests-mock
+pylint
+pytest-cov
+pytest-mock
+pytest
