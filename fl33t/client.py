@@ -11,9 +11,11 @@ import string
 import requests
 
 from fl33t.exceptions import (
-    InvalidDeviceIdError,
-    InvalidSessionIdError,
     InvalidBuildIdError,
+    InvalidDeviceIdError,
+    InvalidFleetIdError,
+    InvalidSessionIdError,
+    InvalidTrainIdError,
     UnprivilegedToken,
     Fl33tApiException
 )
@@ -223,6 +225,9 @@ class Fl33tClient:  # pylint: disable=too-many-public-methods
 
         result = self.get(url)
         if result:
+            if result.status_code == 400:
+                raise InvalidFleetIdError(fleet_id)
+
             if 'fleet' in result.json():
                 fleet = result.json()['fleet']
                 return Fleet(client=self, **fleet)
@@ -241,7 +246,7 @@ class Fl33tClient:  # pylint: disable=too-many-public-methods
         result = self.get(url)
         if result:
             if result.status_code == 404:
-                raise InvalidBuildIdError()
+                raise InvalidBuildIdError(build_id)
 
             if 'build' in result.json():
                 build = result.json()['build']
@@ -262,6 +267,9 @@ class Fl33tClient:  # pylint: disable=too-many-public-methods
 
         result = self.get(url)
         if result:
+            if result.status_code == 400:
+                raise InvalidTrainIdError(train_id)
+
             if 'train' in result.json():
                 train = result.json()['train']
                 return Train(client=self, **train)
@@ -280,7 +288,8 @@ class Fl33tClient:  # pylint: disable=too-many-public-methods
         result = self.get(url)
         if result:
             if result.status_code == 400:
-                raise InvalidDeviceIdError()
+                raise InvalidDeviceIdError(device_id)
+
             if 'device' in result.json():
                 device = result.json()['device']
                 return Device(client=self, **device)
@@ -288,31 +297,7 @@ class Fl33tClient:  # pylint: disable=too-many-public-methods
         LOGGER.exception('Could not retrieve device: {}'.format(device_id))
         return False
 
-    def create_device_id(self, fleet_id, device_id=None, name=None):
-        """
-        Create a device ID in Fleet.
-
-        If ``device_id`` is specified, used that as the ID If not specified, a
-        random string will be used instead.
-        """
-
-        device = Device(
-            client=self,
-            name=name,
-            fleet_id=fleet_id,
-            device_id=device_id
-        )
-
-        return device.create()
-
-    def delete_device_id(self, device_id):
-        """Delete a device by device ID in Fleet."""
-
-        device = self.get_device(device_id)
-        return device.delete()
-
-    # pylint: disable=unused-argument
-    def has_firmware_update(self, device_id, currently_installed_id=None):
+    def has_upgrade_available(self, device_id, currently_installed_id=None):
         """
         Does this device have pending firmware updates?
 
@@ -320,8 +305,26 @@ class Fl33tClient:  # pylint: disable=too-many-public-methods
         a query argument to the fl33t endpoint.
         """
 
-        device = self.get_device(device_id)
-        return device.upgrade_available()
+        url = '/'.join((self.base_team_url(), 'device/{}/build'.format(
+            device_id)))
+
+        params = None
+        if currently_installed_id:
+            params = {
+                'installed_build_id': currently_installed_id
+            }
+
+        result = self.get(url, params=params)
+        if result:
+            # No update available.
+            if result.status_code == 204:
+                return False
+
+            if 'build' in result.json():
+                build = result.json()['build']
+                return self.Build(**build)
+
+        return False
 
     def list_fleets(self, train_id=None, offset=None, limit=None):
         """Get all fleets from fl33t."""

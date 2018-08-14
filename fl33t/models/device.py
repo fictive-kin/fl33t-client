@@ -42,27 +42,16 @@ class Device(BaseModel, OneBuildMixin, OneFleetMixin):
                               'to generate and ID'))
         super().__init__(**kwargs)
 
-    def upgrade_available(self):
+    def upgrade_available(self, installed_build_id=None):
         """Returns the available firmware update, if there is one"""
-        url = '/'.join((self._base_url(), '{}/build'.format(self.device_id)))
-        params = None
 
-        if self.build_id:
-            params = {
-                'installed_build_id': self.build_id
-            }
+        if not installed_build_id and self.build_id:
+            installed_build_id = self.build_id
 
-        result = self._client.get(url, params=params)
-        if result:
-            # No update available.
-            if result.status_code == 204:
-                return False
-
-            if 'build' in result.json():
-                build = result.json()['build']
-                return self._client.Build(**build)
-
-        return False
+        return self._client.has_upgrade_available(
+            self.device_id,
+            currently_installed_id=installed_build_id
+        )
 
     def __str__(self):
         return 'Device {}: {} (Fleet: {}, Build: {})'.format(
