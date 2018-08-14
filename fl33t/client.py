@@ -180,8 +180,7 @@ class Fl33tClient:  # pylint: disable=too-many-public-methods
         """
         List API Sessions
         """
-        url = "/".join((self.base_uri, 'team/{}/sessions'.format(
-            self.team_id)))
+        url = "/".join((self.base_team_url(), 'sessions'))
         params = self._build_offset_limit(offset=offset, limit=limit)
 
         result = self.get(url, params=params)
@@ -201,8 +200,8 @@ class Fl33tClient:  # pylint: disable=too-many-public-methods
         Return information about a specific session_token
         """
 
-        url = "/".join((self.base_uri, 'team/{}/session/{}'.format(
-            self.team_id, session_token)))
+        url = "/".join((self.base_team_url(), 'session/{}'.format(
+            session_token)))
 
         result = self.get(url)
         if result:
@@ -221,8 +220,7 @@ class Fl33tClient:  # pylint: disable=too-many-public-methods
         Return information about a specific fleet
         """
 
-        url = "/".join((self.base_uri, 'team/{}/fleet/{}'.format(
-            self.team_id, fleet_id)))
+        url = "/".join((self.base_team_url(), 'fleet/{}'.format(fleet_id)))
 
         result = self.get(url)
         if result:
@@ -238,8 +236,8 @@ class Fl33tClient:  # pylint: disable=too-many-public-methods
         Return information about a specific build
         """
 
-        url = "/".join((self.base_uri, 'team/{}/train/{}/build/{}'.format(
-            self.team_id, train_id, build_id)))
+        url = "/".join((self.base_team_url(), 'train/{}/build/{}'.format(
+            train_id, build_id)))
 
         result = self.get(url)
         if result:
@@ -260,8 +258,8 @@ class Fl33tClient:  # pylint: disable=too-many-public-methods
         Return information about a specific train
         """
 
-        url = "/".join((self.base_uri, 'team/{}/train/{}'.format(
-            self.team_id, train_id)))
+        url = "/".join((self.base_team_url(), 'train/{}'.format(
+            train_id)))
 
         result = self.get(url)
         if result:
@@ -277,8 +275,8 @@ class Fl33tClient:  # pylint: disable=too-many-public-methods
         Get a device by ID from Fleet.
         """
 
-        url = "/".join((self.base_uri, 'team/{}/device/{}'.format(
-            self.team_id, device_id)))
+        url = "/".join((self.base_team_url(), 'device/{}'.format(
+            device_id)))
 
         result = self.get(url)
         if result:
@@ -338,6 +336,7 @@ class Fl33tClient:  # pylint: disable=too-many-public-methods
         LOGGER.exception('Could not delete device')
         return False
 
+    # pylint: disable=unused-argument
     def has_firmware_update(self, device_id, currently_installed_id=None):
         """
         Does this device have pending firmware updates?
@@ -346,32 +345,15 @@ class Fl33tClient:  # pylint: disable=too-many-public-methods
         a query argument to the fl33t endpoint.
         """
 
-        url = "/".join((self.base_uri, 'team/{}/device/{}/build'.format(
-            self.team_id, device_id)))
-        params = None
-
-        if currently_installed_id:
-            params = {
-                'installed_build_id': currently_installed_id
-            }
-
-        result = self.get(url, params=params)
-        if result:
-            # No update available.
-            if result.status_code == 204:
-                return False
-            if 'build' in result.json():
-                build = result.json()['build']
-                return Build(client=self, **build)
-
-        LOGGER.exception('Could not check for firmware updates')
-        return False
+        device = self.get_device(device_id)
+        return device.upgrade_available()
 
     def list_fleets(self, train_id=None, offset=None, limit=None):
         """Get all fleets from fl33t."""
 
-        url = "/".join((self.base_uri, 'team/{}/fleets'.format(self.team_id)))
+        url = "/".join((self.base_team_url(), 'fleets'))
         params = self._build_offset_limit(offset=offset, limit=limit)
+
         if train_id:
             params['train_id'] = train_id
 
@@ -386,7 +368,7 @@ class Fl33tClient:  # pylint: disable=too-many-public-methods
     def list_trains(self, offset=None, limit=None):
         """Get all trains from fl33t."""
 
-        url = "/".join((self.base_uri, 'team/{}/trains'.format(self.team_id)))
+        url = "/".join((self.base_team_url(), 'trains'))
         params = self._build_offset_limit(offset=offset, limit=limit)
 
         result = self.get(url, params=params)
@@ -400,7 +382,7 @@ class Fl33tClient:  # pylint: disable=too-many-public-methods
     def list_devices(self, fleet_id=None, offset=None, limit=None):
         """Get all devices from fl33t."""
 
-        url = "/".join((self.base_uri, 'team/{}/devices'.format(self.team_id)))
+        url = "/".join((self.base_team_url(), 'devices'))
         params = self._build_offset_limit(offset=offset, limit=limit)
         if fleet_id:
             params['fleet_id'] = fleet_id
@@ -416,8 +398,8 @@ class Fl33tClient:  # pylint: disable=too-many-public-methods
     def list_builds(self, train_id, version=None, offset=None, limit=None):
         """Get all builds from fl33t, by train id."""
 
-        url = "/".join((self.base_uri, 'team/{}/train/{}/builds'.format(
-            self.team_id, train_id)))
+        url = "/".join((self.base_team_url(), 'train/{}/builds'.format(
+            train_id)))
         params = self._build_offset_limit(offset=offset, limit=limit)
         if version:
             params['version'] = version

@@ -114,9 +114,9 @@ class Build(BaseModel, OneTrainMixin):
                 'Could not create build for: {}'.format(self.version))
             return False
 
-        build_data = result.json()['build']
-        for key in build_data.keys():
-            setattr(self, key, build_data[key])
+        data = result.json()['build']
+        for key in data.keys():
+            setattr(self, key, data[key])
 
         if not self.upload_url:
             self.logger.exception(
