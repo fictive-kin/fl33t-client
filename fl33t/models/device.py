@@ -8,6 +8,10 @@ All the models in use by Fl33t
 
 import datetime
 
+from fl33t.exceptions import (
+    InvalidDeviceIdError,
+    DuplicateDeviceIdError
+)
 from fl33t.models.base import BaseModel
 from fl33t.models.mixins import (
     OneBuildMixin,
@@ -27,6 +31,16 @@ class Device(BaseModel, OneBuildMixin, OneFleetMixin):
         'name': '',
         'session_token': ''
     }
+
+    def __init__(self, **kwargs):
+        client = kwargs.get('client')
+        if client:
+            device_id = kwargs.pop('device_id', client.generate_id_string())
+            kwargs['device_id'] = device_id
+        elif 'device_id' not in kwargs:
+            raise ValueError(('No device_id was provided, nor an API client '
+                              'to generate and ID'))
+        super().__init__(**kwargs)
 
     def upgrade_available(self):
         """Returns the available firmware update, if there is one"""
@@ -91,6 +105,10 @@ class Device(BaseModel, OneBuildMixin, OneFleetMixin):
         url = "/".join((self._base_url(), self.device_id))
 
         result = self._client.delete(url)
+
+        if result.status_code == 400:
+            raise InvalidDeviceIdError(self.device_id)
+
         return result.status_code == 204
 
     def create(self):
@@ -99,7 +117,14 @@ class Device(BaseModel, OneBuildMixin, OneFleetMixin):
         url = self._base_url()
 
         result = self._client.post(url, data=self)
-        if not result or 'device' not in result.json():
+        if not result:
+            self.logger.exception('Could not create device')
+            return False
+
+        if result.status_code == 409:
+            raise DuplicateDeviceIdError(self.device_id)
+
+        if 'device' not in result.json():
             self.logger.exception('Could not create device')
             return False
 

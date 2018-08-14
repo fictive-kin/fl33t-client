@@ -11,7 +11,6 @@ import string
 import requests
 
 from fl33t.exceptions import (
-    DuplicateDeviceIdError,
     InvalidDeviceIdError,
     InvalidSessionIdError,
     InvalidBuildIdError,
@@ -74,19 +73,19 @@ class Fl33tClient:  # pylint: disable=too-many-public-methods
             self.default_query_limit = 25
 
     def Build(self, **kwargs):  # pylint: disable=invalid-name
-        """Return a client connect Build"""
+        """Return a client connected Build"""
         return Build(client=self, **kwargs)
 
     def Device(self, **kwargs):  # pylint: disable=invalid-name
-        """Return a client connect Device"""
+        """Return a client connected Device"""
         return Device(client=self, **kwargs)
 
     def Fleet(self, **kwargs):  # pylint: disable=invalid-name
-        """Return a client connect Fleet"""
+        """Return a client connected Fleet"""
         return Fleet(client=self, **kwargs)
 
     def Train(self, **kwargs):  # pylint: disable=invalid-name
-        """Return a client connect Train"""
+        """Return a client connected Train"""
         return Train(client=self, **kwargs)
 
     def Session(self, **kwargs):  # pylint: disable=invalid-name
@@ -110,7 +109,7 @@ class Fl33tClient:  # pylint: disable=too-many-public-methods
             'limit': limit
         }
 
-    def _generate_id_string(self):
+    def generate_id_string(self):
         """Generate random string for use in Fl33t ids."""
         return ''.join(random.SystemRandom().choice(
             string.ascii_lowercase + string.digits) for _ in range(
@@ -297,44 +296,20 @@ class Fl33tClient:  # pylint: disable=too-many-public-methods
         random string will be used instead.
         """
 
-        device_id = device_id or self._generate_id_string()
+        device = Device(
+            client=self,
+            name=name,
+            fleet_id=fleet_id,
+            device_id=device_id
+        )
 
-        url = "/".join((self.base_uri, 'team/{}/device'.format(self.team_id)))
-        data = {
-            'device': {
-                'device_id': device_id,
-                'name': name,
-                'fleet_id': fleet_id
-            }
-        }
-
-        result = self.post(url, data=data)
-        if result:
-            if result.status_code == 409:
-                raise DuplicateDeviceIdError()
-            if 'device' in result.json():
-                device = result.json()['device']
-                return Device(client=self, **device)
-
-        LOGGER.exception('Could not create device')
-        return False
+        return device.create()
 
     def delete_device_id(self, device_id):
         """Delete a device by device ID in Fleet."""
 
-        url = "/".join((self.base_uri, 'team/{}/device/{}'.format(
-            self.team_id, device_id)))
-
-        result = self.delete(url)
-        if result:
-            if result.status_code == 400:
-                raise InvalidDeviceIdError()
-
-            # Device has been deleted if 204.
-            return result.status_code == 204
-
-        LOGGER.exception('Could not delete device')
-        return False
+        device = self.get_device(device_id)
+        return device.delete()
 
     # pylint: disable=unused-argument
     def has_firmware_update(self, device_id, currently_installed_id=None):
