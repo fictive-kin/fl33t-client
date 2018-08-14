@@ -116,6 +116,9 @@ class Build(BaseModel, OneTrainMixin):
 
         data = result.json()['build']
         for key in data.keys():
+            if key == 'filename':
+                # Allowing the filename to be overridden will break the upload
+                continue
             setattr(self, key, data[key])
 
         if not self.upload_url:

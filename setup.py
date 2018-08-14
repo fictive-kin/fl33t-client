@@ -16,7 +16,7 @@ setup(
     maintainer='Fictive Kin LLC',
     maintainer_email='systems@fictivekin.com',
     license='MIT',
-    packages=['fl33t'],
+    packages=['fl33t','fl33t.models'],
     install_requires=[
         'python-dateutil',
         'pytz',
