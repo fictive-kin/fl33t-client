@@ -3,7 +3,7 @@ from setuptools import setup
 
 setup(
     name='fl33t',
-    version='0.3.2',
+    version='0.3.3',
     description='Fl33t API Client',
     classifiers=[
         'Development Status :: 3 - Alpha',
