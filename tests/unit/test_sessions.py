@@ -1,10 +1,10 @@
 
 import copy
 import json
-import pytest
 import requests_mock
 
 from fl33t.models import Session
+
 
 def test_create(fl33t_client):
     session_token = 'asdfasdf;lkj'
@@ -40,6 +40,7 @@ def test_create(fl33t_client):
         assert response.session_token == session_token
         assert response.priv() == 'admin'
 
+
 def test_delete(fl33t_client):
     session_token = 'asdfasdf;lkj'
 
@@ -63,7 +64,8 @@ def test_delete(fl33t_client):
         mock.delete(url, [{'status_code': 204}])
 
         obj = fl33t_client.get_session(session_token)
-        assert obj.delete() == True
+        assert obj.delete() is True
+
 
 def test_list(fl33t_client):
     list_response = {
@@ -102,6 +104,7 @@ def test_list(fl33t_client):
 
         assert len(objs) == 2
 
+
 def test_update(fl33t_client):
 
     session_token = "asdfasdf;lkj"
@@ -137,5 +140,5 @@ def test_update(fl33t_client):
 
         assert isinstance(response, Session)
         assert response.session_token == session_token
-        assert response.admin == True
+        assert response.admin is True
         assert response.priv() == 'admin'

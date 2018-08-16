@@ -1,10 +1,10 @@
 
 import copy
 import json
-import pytest
 import requests_mock
 
 from fl33t.models import Build
+
 
 def test_create(fl33t_client):
     build_id = 'zxcv'
@@ -44,6 +44,7 @@ def test_create(fl33t_client):
         assert isinstance(response, Build)
         assert response.build_id == build_id
 
+
 def test_delete(fl33t_client):
     train_id = 'asdf'
     build_id = 'fdsa'
@@ -72,7 +73,8 @@ def test_delete(fl33t_client):
         mock.delete(url, [{'status_code': 204}])
 
         obj = fl33t_client.get_build(train_id, build_id)
-        assert obj.delete() == True
+        assert obj.delete() is True
+
 
 def test_list(fl33t_client):
     train_id = 'fdsa'
@@ -95,7 +97,8 @@ def test_list(fl33t_client):
             },
             {
                 "build_id": "poiu",
-                "download_url": "https://builds.example.com/path/to/otherdownload",
+                "download_url":
+                    "https://builds.example.com/path/to/otherdownload",
                 "filename": "build.tar",
                 "md5sum": "14758f1afd23c09b7992073ccf00b43d",
                 "released": True,
@@ -121,6 +124,7 @@ def test_list(fl33t_client):
             objs.append(obj)
 
         assert len(objs) == 2
+
 
 def test_update(fl33t_client):
 
@@ -160,4 +164,4 @@ def test_update(fl33t_client):
 
         assert isinstance(response, Build)
         assert response.build_id == build_id
-        assert response.released == True
+        assert response.released is True

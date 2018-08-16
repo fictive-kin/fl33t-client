@@ -1,10 +1,10 @@
 
 import copy
 import json
-import pytest
 import requests_mock
 
 from fl33t.models import Train
+
 
 def test_create(fl33t_client):
     train_id = 'fdsa'
@@ -31,6 +31,7 @@ def test_create(fl33t_client):
         assert isinstance(response, Train)
         assert response.train_id == train_id
 
+
 def test_delete(fl33t_client):
     train_id = 'asdf'
 
@@ -50,7 +51,8 @@ def test_delete(fl33t_client):
         mock.delete(url, [{'status_code': 204}])
 
         obj = fl33t_client.get_train(train_id)
-        assert obj.delete() == True
+        assert obj.delete() is True
+
 
 def test_list(fl33t_client):
     list_response = {
@@ -80,6 +82,7 @@ def test_list(fl33t_client):
             objs.append(obj)
 
         assert len(objs) == 2
+
 
 def test_update(fl33t_client):
 
