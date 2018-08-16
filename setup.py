@@ -1,10 +1,15 @@
 
 from setuptools import setup
 
+def readme():
+    with open('README.rst') as f:
+        return f.read()
+
 setup(
     name='fl33t',
-    version='0.3.3',
+    version='0.3.4',
     description='Fl33t API Client',
+    long_description=readme(),
     classifiers=[
         'Development Status :: 3 - Alpha',
         'License :: OSI Approved :: MIT License',
