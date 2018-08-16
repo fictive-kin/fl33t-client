@@ -6,6 +6,7 @@ Train Model
 
 import datetime
 
+from fl33t.exceptions import Fl33tClientException
 from fl33t.models.base import BaseModel
 from fl33t.models.mixins import (
     ManyBuildsMixin,
@@ -42,6 +43,9 @@ class Train(BaseModel, ManyFleetsMixin, ManyBuildsMixin):
     def update(self):
         """Update this train"""
 
+        if not self._client:
+            raise Fl33tClientException()
+
         url = "/".join((self._base_url(), self.train_id))
 
         result = self._client.put(url, data=self)
@@ -53,6 +57,9 @@ class Train(BaseModel, ManyFleetsMixin, ManyBuildsMixin):
     def delete(self):
         """Delete this train"""
 
+        if not self._client:
+            raise Fl33tClientException()
+
         url = "/".join((self._base_url(), self.train_id))
 
         result = self._client.delete(url)
@@ -60,6 +67,9 @@ class Train(BaseModel, ManyFleetsMixin, ManyBuildsMixin):
 
     def create(self):
         """Create this train in fl33t"""
+
+        if not self._client:
+            raise Fl33tClientException()
 
         url = self._base_url()
 

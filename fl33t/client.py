@@ -1,7 +1,8 @@
 """
 Fl33t Client
+============
 
-The main client class that is used to interact with Fl33t
+The main client class that is used to interact with fl33t.
 """
 
 import logging
@@ -35,7 +36,7 @@ API_HOST = 'https://api.fl33t.com'
 
 class Fl33tClient:  # pylint: disable=too-many-public-methods
     """
-    Handle all Fl33t-related interactions.
+    Handles all Fl33t-related interactions.
 
     Fl33t is used for managing firmware build trains.
 
@@ -75,31 +76,65 @@ class Fl33tClient:  # pylint: disable=too-many-public-methods
             self.default_query_limit = 25
 
     def Build(self, **kwargs):  # pylint: disable=invalid-name
-        """Return a client connected Build"""
+        """
+        Get a client connected build object
+
+        :returns: :py:class:`fl33t.models.build.Build`
+        """
         return Build(client=self, **kwargs)
 
     def Device(self, **kwargs):  # pylint: disable=invalid-name
-        """Return a client connected Device"""
+        """
+        Get a client connected device object
+
+        :returns: :py:class:`fl33t.models.device.Device`
+        """
         return Device(client=self, **kwargs)
 
     def Fleet(self, **kwargs):  # pylint: disable=invalid-name
-        """Return a client connected Fleet"""
+        """
+        Get a client connected fleet object
+
+        :returns: :py:class:`fl33t.models.fleet.Fleet`
+        """
         return Fleet(client=self, **kwargs)
 
     def Train(self, **kwargs):  # pylint: disable=invalid-name
-        """Return a client connected Train"""
+        """
+        Get a client connected train object
+
+        :returns: :py:class:`fl33t.models.train.Train`
+        """
         return Train(client=self, **kwargs)
 
     def Session(self, **kwargs):  # pylint: disable=invalid-name
-        """Return a client connected Session"""
+        """
+        Get a client connected session object
+
+        :returns::py:class:`fl33t.models.session.Session`
+        """
         return Session(client=self, **kwargs)
 
     def base_team_url(self):
-        """Returns the base team URL for this client"""
+        """
+        Get the base team URL for this client
+
+        :returns: str
+        """
         return '/'.join((self.base_uri, 'team/{}'.format(self.team_id)))
 
     def _build_offset_limit(self, offset=None, limit=None):
-        """Get the offset/limit query params allowing defaults"""
+        """
+        Get the offset/limit query params allowing defaults
+
+        :param offset: If provided, the starting offset for result sets.
+            Defaults to 0
+        :type offset: int or None
+        :param limit: If provided, the number of records to return.
+            Defaults to :py:attr:`default_query_limit`
+        :type limit: int or None
+        :returns: dict of parameters for use in a request
+        """
         if not offset or int(offset) < 1:
             offset = 0
 
@@ -112,32 +147,73 @@ class Fl33tClient:  # pylint: disable=too-many-public-methods
         }
 
     def generate_id_string(self):
-        """Generate random string for use in Fl33t ids."""
+        """
+        Generate random string for use in Fl33t ids.
+
+        :returns: str
+        """
         return ''.join(random.SystemRandom().choice(
             string.ascii_lowercase + string.digits) for _ in range(
                 self.generated_id_length))
 
     def get(self, url, **kwargs):
-        """Send a GET request"""
-        return self.request('GET', url, **kwargs)
+        """
+        Send an authenticated GET request to fl33t
+
+        :param str url: The URL to request
+        :param kwargs: Any keyword args that :py:class:`requests.get` accepts
+        :returns: :py:class:`requests.Response`
+        """
+        return self._request('GET', url, **kwargs)
 
     def post(self, url, **kwargs):
-        """Send a POST request"""
-        return self.request('POST', url, **kwargs)
+        """
+        Send an authenticated POST request to fl33t
+
+        :param str url: The URL to request
+        :param kwargs: Any keyword args that :py:class:`requests.post` accepts
+        :returns: :py:class:`requests.Response`
+        """
+        return self._request('POST', url, **kwargs)
 
     def put(self, url, **kwargs):
-        """Send a PUT request"""
-        return self.request('PUT', url, **kwargs)
+        """
+        Send an authenticated PUT request to fl33t
+
+        :param str url: The URL to request
+        :param kwargs: Any keyword args that :py:class:`requests.put` accepts
+        :returns: :py:class:`requests.Response`
+        """
+        return self._request('PUT', url, **kwargs)
 
     def delete(self, url, **kwargs):
-        """Send a DELETE request"""
-        return self.request('DELETE', url, **kwargs)
+        """
+        Send an authenticated DELETE request to fl33t
 
-    def request(self, method, url, **kwargs):
+        :param str url: The URL to request
+        :param kwargs: Any keyword args that :py:class:`requests.delete`
+            accepts
+        :returns: :py:class:`requests.Response`
+        :raises UnprivilegedToken: if the session token does not have enough
+            privilege to view the session information
+        :raises Fl33tApiException: if there was a 5xx error returned by fl33t
+        """
+        return self._request('DELETE', url, **kwargs)
+
+    def _request(self, method, url, **kwargs):
         """
         Wrapper for `requests` methods to include the bearer token
         If you need to make a call without the bearer token, make it
         directly against `requests`
+
+        :param str method: The request method to use
+        :param str url: The URL to request
+        :param kwargs: Any keyword args that :py:module:`requests` methods
+            accept
+        :returns: :py:class:`requests.Response` or False
+        :raises UnprivilegedToken: if the session token does not have enough
+            privilege to view the session information
+        :raises Fl33tApiException: if there was a 5xx error returned by fl33t
         """
 
         headers = kwargs.get('headers') if kwargs.get('headers') else {}
@@ -173,13 +249,28 @@ class Fl33tClient:  # pylint: disable=too-many-public-methods
             raise UnprivilegedToken(url)
 
         if result.status_code >= 500:
-            raise Fl33tApiException(url, result.status_code, result.text)
+            message = '{} returned a {} error: {}'.format(
+                url,
+                result.status_code,
+                result.text)
+            raise Fl33tApiException(message)
 
         return result
 
     def list_sessions(self, offset=None, limit=None):
         """
         List API Sessions
+
+        :param offset: If provided, the starting offset for result sets.
+            Defaults to 0
+        :type offset: int or None
+        :param limit: If provided, the number of records to return.
+            Defaults to :py:attr:`default_query_limit`
+        :type limit: int or None
+        :yields: generator of `fl33t.models.session.Session`
+        :raises UnprivilegedToken: if the session token does not have enough
+            privilege to view the session information
+        :raises Fl33tApiException: if there was a 5xx error returned by fl33t
         """
         url = "/".join((self.base_team_url(), 'sessions'))
         params = self._build_offset_limit(offset=offset, limit=limit)
@@ -192,6 +283,12 @@ class Fl33tClient:  # pylint: disable=too-many-public-methods
     def get_own_session(self):
         """
         Return information about the current token
+
+        :returns: :py:class:`fl33t.models.session.Session`
+        :raises InvalidSessionIdError: if the session token does not exist
+        :raises UnprivilegedToken: if the session token does not have enough
+            privilege to view the session information
+        :raises Fl33tApiException: if there was a 5xx error returned by fl33t
         """
 
         return self.get_session(self.token)
@@ -199,6 +296,14 @@ class Fl33tClient:  # pylint: disable=too-many-public-methods
     def get_session(self, session_token):
         """
         Return information about a specific session_token
+
+        :param str session_token: The session token that you want information
+            about
+        :returns: :py:class:`fl33t.models.session.Session`
+        :raises InvalidSessionIdError: if the session token does not exist
+        :raises UnprivilegedToken: if the session token does not have enough
+            privilege to view the session information
+        :raises Fl33tApiException: if there was a 5xx error returned by fl33t
         """
 
         url = "/".join((self.base_team_url(), 'session/{}'.format(
@@ -206,38 +311,52 @@ class Fl33tClient:  # pylint: disable=too-many-public-methods
 
         result = self.get(url)
         if result:
-            if result.status_code == 400:
+            if result.status_code in [400, 404]:
                 raise InvalidSessionIdError()
 
             if 'session' in result.json():
                 session = result.json()['session']
                 return Session(client=self, **session)
 
-        LOGGER.exception('Could not retrieve session.')
-        return False
+        raise Fl33tApiException('Could not retrieve session.')
 
     def get_fleet(self, fleet_id):
         """
         Return information about a specific fleet
+
+        :param str fleet_id: The fleet ID to retrieve information for
+        :returns: :py:class:`fl33t.models.fleet.Fleet`
+        :raises InvalidFleetIdError: if the fleet does not exist
+        :raises UnprivilegedToken: if the session token does not have enough
+            privilege to view the session information
+        :raises Fl33tApiException: if there was a 5xx error returned by fl33t
         """
 
         url = "/".join((self.base_team_url(), 'fleet/{}'.format(fleet_id)))
 
         result = self.get(url)
         if result:
-            if result.status_code == 400:
+            if result.status_code in [400, 404]:
                 raise InvalidFleetIdError(fleet_id)
 
             if 'fleet' in result.json():
                 fleet = result.json()['fleet']
                 return Fleet(client=self, **fleet)
 
-        LOGGER.exception('Could not retrieve fleet: {}'.format(fleet_id))
-        return False
+        raise Fl33tApiException('Could not retrieve fleet: {}'.format(
+            fleet_id))
 
     def get_build(self, train_id, build_id):
         """
         Return information about a specific build
+
+        :param str train_id: The train ID that owns the provided build ID
+        :param str build_id: The build ID to retrieve information for
+        :returns: :py:class:`fl33t.models.build.Build`
+        :raises InvalidBuildIdError: if the build does not exist
+        :raises UnprivilegedToken: if the session token does not have enough
+            privilege to view the session information
+        :raises Fl33tApiException: if there was a 5xx error returned by fl33t
         """
 
         url = "/".join((self.base_team_url(), 'train/{}/build/{}'.format(
@@ -245,21 +364,27 @@ class Fl33tClient:  # pylint: disable=too-many-public-methods
 
         result = self.get(url)
         if result:
-            if result.status_code == 404:
+            if result.status_code in [400, 404]:
                 raise InvalidBuildIdError(build_id)
 
             if 'build' in result.json():
                 build = result.json()['build']
                 return Build(client=self, **build)
 
-        LOGGER.exception(
+        raise Fl33tApiException(
             'Could not retrieve build: {} from train {}'.format(
                 build_id, train_id))
-        return False
 
     def get_train(self, train_id):
         """
         Return information about a specific train
+
+        :param str train_id: The train ID to retrieve information for
+        :returns: :py:class:`fl33t.models.train.Train`
+        :raises InvalidTrainIdError: if the train does not exist
+        :raises UnprivilegedToken: if the session token does not have enough
+            privilege to view the session information
+        :raises Fl33tApiException: if there was a 5xx error returned by fl33t
         """
 
         url = "/".join((self.base_team_url(), 'train/{}'.format(
@@ -274,12 +399,19 @@ class Fl33tClient:  # pylint: disable=too-many-public-methods
                 train = result.json()['train']
                 return Train(client=self, **train)
 
-        LOGGER.exception('Could not retrieve train: {}'.format(train_id))
-        return False
+        raise Fl33tApiException('Could not retrieve train: {}'.format(
+            train_id))
 
     def get_device(self, device_id):
         """
         Get a device by ID from Fleet.
+
+        :param str device_id: The device ID to retrieve information for
+        :returns: :py:class:`fl33t.models.device.Device`
+        :raises InvalidDeviceIdError: if the device does not exist
+        :raises UnprivilegedToken: if the session token does not have enough
+            privilege to view the session information
+        :raises Fl33tApiException: if there was a 5xx error returned by fl33t
         """
 
         url = "/".join((self.base_team_url(), 'device/{}'.format(
@@ -294,15 +426,21 @@ class Fl33tClient:  # pylint: disable=too-many-public-methods
                 device = result.json()['device']
                 return Device(client=self, **device)
 
-        LOGGER.exception('Could not retrieve device: {}'.format(device_id))
-        return False
+        raise Fl33tApiException('Could not retrieve device: {}'.format(
+            device_id))
 
     def has_upgrade_available(self, device_id, currently_installed_id=None):
         """
         Does this device have pending firmware updates?
 
-        If ``currently_installed_id`` is specified, the value will be passed as
-        a query argument to the fl33t endpoint.
+        :param str device_id: The device ID to check for updates
+        :param currently_installed_id: If provided, the build ID currently
+            installed on the device
+        :type currently_installed_id: str or None
+        :returns: :py:class:`fl33t.models.build.Build` or False
+        :raises UnprivilegedToken: if the session token does not have enough
+            privilege to view the session information
+        :raises Fl33tApiException: if there was a 5xx error returned by fl33t
         """
 
         url = '/'.join((self.base_team_url(), 'device/{}/build'.format(
@@ -324,10 +462,26 @@ class Fl33tClient:  # pylint: disable=too-many-public-methods
                 build = result.json()['build']
                 return self.Build(**build)
 
-        return False
+        raise Fl33tApiException('Could not check for firmware upgrade')
 
     def list_fleets(self, train_id=None, offset=None, limit=None):
-        """Get all fleets from fl33t."""
+        """
+        Get all fleets from fl33t.
+
+        :param train_id: If provided, limits the result set to fleets
+            belonging to the specified train ID
+        :type train_id: str or None
+        :param offset: If provided, the starting offset for result sets.
+            Defaults to 0
+        :type offset: int or None
+        :param limit: If provided, the number of records to return.
+            Defaults to :py:attr:`default_query_limit`
+        :type limit: int or None
+        :yields: generator of :py:class:`fl33t.models.fleet.Fleet`
+        :raises UnprivilegedToken: if the session token does not have enough
+            privilege to view the session information
+        :raises Fl33tApiException: if there was a 5xx error returned by fl33t
+        """
 
         url = "/".join((self.base_team_url(), 'fleets'))
         params = self._build_offset_limit(offset=offset, limit=limit)
@@ -337,28 +491,55 @@ class Fl33tClient:  # pylint: disable=too-many-public-methods
 
         result = self.get(url, params=params)
         if not result or 'fleets' not in result.json():
-            LOGGER.exception('Could not fetch fleets')
-            return
+            raise Fl33tApiException('Could not fetch fleets')
 
         for item in result.json()['fleets']:
             yield Fleet(client=self, **item)
 
     def list_trains(self, offset=None, limit=None):
-        """Get all trains from fl33t."""
+        """
+        Get all trains from fl33t.
+
+        :param offset: If provided, the starting offset for result sets.
+            Defaults to 0
+        :type offset: int or None
+        :param limit: If provided, the number of records to return.
+            Defaults to :py:attr:`default_query_limit`
+        :type limit: int or None
+        :yields: generator of :py:class:`fl33t.models.train.Train`
+        :raises UnprivilegedToken: if the session token does not have enough
+            privilege to view the session information
+        :raises Fl33tApiException: if there was a 5xx error returned by fl33t
+        """
 
         url = "/".join((self.base_team_url(), 'trains'))
         params = self._build_offset_limit(offset=offset, limit=limit)
 
         result = self.get(url, params=params)
         if not result or 'trains' not in result.json():
-            LOGGER.exception('Could not fetch trains')
-            return
+            raise Fl33tApiException('Could not fetch trains')
 
         for item in result.json()['trains']:
             yield Train(client=self, **item)
 
     def list_devices(self, fleet_id=None, offset=None, limit=None):
-        """Get all devices from fl33t."""
+        """
+        Get all devices from fl33t.
+
+        :param fleet_id: If provided, limits the result set to devices in the
+            specified fleet
+        :type fleet_id: str or None
+        :param offset: If provided, the starting offset for result sets.
+            Defaults to 0
+        :type offset: int or None
+        :param limit: If provided, the number of records to return.
+            Defaults to :py:attr:`default_query_limit`
+        :type limit: int or None
+        :yields: generator of :py:class:`fl33t.models.device.Device`
+        :raises UnprivilegedToken: if the session token does not have enough
+            privilege to view the session information
+        :raises Fl33tApiException: if there was a 5xx error returned by fl33t
+        """
 
         url = "/".join((self.base_team_url(), 'devices'))
         params = self._build_offset_limit(offset=offset, limit=limit)
@@ -367,14 +548,27 @@ class Fl33tClient:  # pylint: disable=too-many-public-methods
 
         result = self.get(url, params=params)
         if not result or 'devices' not in result.json():
-            LOGGER.exception('Could not fetch devices')
-            return
+            raise Fl33tApiException('Could not fetch devices')
 
         for item in result.json()['devices']:
             yield Device(client=self, **item)
 
     def list_builds(self, train_id, version=None, offset=None, limit=None):
-        """Get all builds from fl33t, by train id."""
+        """
+        Get all builds from fl33t, by train id.
+
+        :param int train_id: The train_id that the builds are part of
+        :param offset: If provided, the starting offset for result sets.
+            Defaults to 0
+        :type offset: int or None
+        :param limit: If provided, the number of records to return.
+            Defaults to :py:attr:`default_query_limit`
+        :type limit: int or None
+        :yields: generator of :py:class:`fl33t.models.build.Build`
+        :raises UnprivilegedToken: if the session token does not have enough
+            privilege to view the session information
+        :raises Fl33tApiException: if there was a 5xx error returned by fl33t
+        """
 
         url = "/".join((self.base_team_url(), 'train/{}/builds'.format(
             train_id)))
@@ -384,9 +578,8 @@ class Fl33tClient:  # pylint: disable=too-many-public-methods
 
         result = self.get(url, params=params)
         if not result or 'builds' not in result.json():
-            LOGGER.exception('Could not fetch builds for train: {}'.format(
-                train_id))
-            return
+            raise Fl33tApiException(
+                'Could not fetch builds for train: {}'.format(train_id))
 
         for item in result.json()['builds']:
             yield Build(client=self, **item)

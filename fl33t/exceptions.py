@@ -46,13 +46,9 @@ class UnprivilegedToken(Exception):
 
 class Fl33tApiException(Exception):
     """The Fl33t API returned an exception handling our request"""
-
-    _message = 'The Fl33t API returned an error for: {} : {} - {}'
-
-    def __init__(self, url, status_code, message):
-        super().__init__(self._message.format(url, status_code, message))
+    pass
 
 
-class Fl33tClientMissing(Exception):
+class Fl33tClientException(Exception):
     """A model has been instantiated without providing an API client"""
     pass

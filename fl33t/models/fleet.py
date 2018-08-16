@@ -6,6 +6,7 @@ All the models in use by Fl33t
 
 """
 
+from fl33t.exceptions import Fl33tClientException
 from fl33t.models.base import BaseModel
 from fl33t.models.mixins import (
     OneBuildMixin,
@@ -57,6 +58,9 @@ class Fleet(BaseModel, OneTrainMixin, OneBuildMixin, ManyDevicesMixin):
     def update(self):
         """Update this fleet"""
 
+        if not self._client:
+            raise Fl33tClientException()
+
         url = "/".join((self._base_url(), self.fleet_id))
 
         result = self._client.put(url, data=self)
@@ -68,6 +72,9 @@ class Fleet(BaseModel, OneTrainMixin, OneBuildMixin, ManyDevicesMixin):
     def delete(self):
         """Delete this fleet"""
 
+        if not self._client:
+            raise Fl33tClientException()
+
         url = "/".join((self._base_url(), self.fleet_id))
 
         result = self._client.delete(url)
@@ -75,6 +82,9 @@ class Fleet(BaseModel, OneTrainMixin, OneBuildMixin, ManyDevicesMixin):
 
     def create(self):
         """Create this fleet in fl33t"""
+
+        if not self._client:
+            raise Fl33tClientException()
 
         url = self._base_url()
 

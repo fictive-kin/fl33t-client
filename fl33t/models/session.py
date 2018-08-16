@@ -6,6 +6,7 @@ All the models in use by Fl33t
 
 """
 
+from fl33t.exceptions import Fl33tClientException
 from fl33t.models.base import BaseModel
 
 
@@ -60,6 +61,9 @@ class Session(BaseModel):
     def update(self):
         """Update this session"""
 
+        if not self._client:
+            raise Fl33tClientException()
+
         url = "/".join((self._base_url(), self.session_token))
 
         result = self._client.put(url, data=self)
@@ -71,6 +75,9 @@ class Session(BaseModel):
     def delete(self):
         """Delete this session"""
 
+        if not self._client:
+            raise Fl33tClientException()
+
         url = "/".join((self._base_url(), self.session_token))
 
         result = self._client.delete(url)
@@ -78,6 +85,9 @@ class Session(BaseModel):
 
     def create(self):
         """Create this session in fl33t"""
+
+        if not self._client:
+            raise Fl33tClientException()
 
         url = self._base_url()
 

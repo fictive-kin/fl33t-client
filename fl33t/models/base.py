@@ -10,7 +10,6 @@ import logging
 
 from dateutil import parser
 
-from fl33t.exceptions import Fl33tClientMissing
 from fl33t.utils import ExtendedEncoder
 
 
@@ -24,8 +23,8 @@ class BaseModel():
     _enums = {}
     _client = None
 
-    def __init__(self, **kwargs):
-        self._client = kwargs.pop('client', None)
+    def __init__(self, client=None, **kwargs):
+        self._client = client
 
         self.logger = logging.getLogger(__name__)
         for key in self._defaults.keys():
@@ -33,7 +32,7 @@ class BaseModel():
                 self._data[key] = self._defaults[key]
 
             else:
-                self.set_data(key, kwargs[key])
+                self._set_data(key, kwargs[key])
 
     def to_json(self):
         """Dumps this model as JSON for use in API calls"""
@@ -54,7 +53,7 @@ class BaseModel():
 
         return self._data.get(key, default)
 
-    def set_data(self, key, value):
+    def _set_data(self, key, value):
         """Sets a value within the model's allowed properties"""
 
         if key not in self._defaults:
@@ -92,30 +91,3 @@ class BaseModel():
 
         else:
             self._data[key] = value
-
-    def create(self):
-        """Calls API client create method"""
-
-        if not self._client:
-            raise Fl33tClientMissing()
-        method = getattr(self._client,
-                         '{}_create'.format(self.__class__.__name__.lower()))
-        return method(self)
-
-    def delete(self):
-        """Calls API client delete method"""
-
-        if not self._client:
-            raise Fl33tClientMissing()
-        method = getattr(self._client,
-                         '{}_delete'.format(self.__class__.__name__.lower()))
-        return method(self)
-
-    def update(self):
-        """Calls API client update method"""
-
-        if not self._client:
-            raise Fl33tClientMissing()
-        method = getattr(self._client,
-                         '{}_update'.format(self.__class__.__name__.lower()))
-        return method(self)

@@ -9,6 +9,7 @@ import os
 
 import requests
 
+from fl33t.exceptions import Fl33tClientException
 from fl33t.models.base import BaseModel
 from fl33t.models.mixins import OneTrainMixin
 from fl33t.utils import md5
@@ -40,7 +41,7 @@ class Build(BaseModel, OneTrainMixin):
 
     fullpath = None
 
-    def __init__(self, **kwargs):
+    def __init__(self, client=None, **kwargs):
         # need to have both the full path, if provided and the basename to
         # the build file
         if 'filename' in kwargs and kwargs['filename']:
@@ -51,7 +52,7 @@ class Build(BaseModel, OneTrainMixin):
             if 'size' not in kwargs:
                 kwargs['size'] = os.path.getsize(self.fullpath)
 
-        super().__init__(**kwargs)
+        super().__init__(client=client, **kwargs)
 
     def __str__(self):
         return ('Build {}: {} (Status: {}, Released: {}, Train: {}, Size: {},'
@@ -87,6 +88,9 @@ class Build(BaseModel, OneTrainMixin):
     def update(self):
         """Update this build"""
 
+        if not self._client:
+            raise Fl33tClientException()
+
         url = "/".join((self._base_url(), self.build_id))
 
         result = self._client.put(url, data=self)
@@ -98,6 +102,9 @@ class Build(BaseModel, OneTrainMixin):
     def delete(self):
         """Delete this build from a Fl33t train"""
 
+        if not self._client:
+            raise Fl33tClientException()
+
         url = "/".join((self._base_url(), self.build_id))
 
         result = self._client.delete(url)
@@ -105,6 +112,9 @@ class Build(BaseModel, OneTrainMixin):
 
     def create(self):
         """Create this build record in fl33t and upload the new build file"""
+
+        if not self._client:
+            raise Fl33tClientException()
 
         url = self._base_url()
 

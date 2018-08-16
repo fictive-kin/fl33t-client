@@ -9,6 +9,7 @@ All the models in use by Fl33t
 import datetime
 
 from fl33t.exceptions import (
+    Fl33tClientException,
     InvalidDeviceIdError,
     DuplicateDeviceIdError
 )
@@ -32,18 +33,20 @@ class Device(BaseModel, OneBuildMixin, OneFleetMixin):
         'session_token': ''
     }
 
-    def __init__(self, **kwargs):
-        client = kwargs.get('client')
+    def __init__(self, client=None, **kwargs):
         if client:
             device_id = kwargs.pop('device_id', client.generate_id_string())
             kwargs['device_id'] = device_id
         elif 'device_id' not in kwargs:
             raise ValueError(('No device_id was provided, nor an API client '
                               'to generate and ID'))
-        super().__init__(**kwargs)
+        super().__init__(client=client, **kwargs)
 
     def upgrade_available(self, installed_build_id=None):
         """Returns the available firmware update, if there is one"""
+
+        if not self._client:
+            raise Fl33tClientException()
 
         if not installed_build_id and self.build_id:
             installed_build_id = self.build_id
@@ -80,6 +83,9 @@ class Device(BaseModel, OneBuildMixin, OneFleetMixin):
     def update(self):
         """Update this device"""
 
+        if not self._client:
+            raise Fl33tClientException()
+
         url = "/".join((self._base_url(), self.device_id))
 
         result = self._client.put(url, data=self)
@@ -90,6 +96,9 @@ class Device(BaseModel, OneBuildMixin, OneFleetMixin):
 
     def delete(self):
         """Delete this device"""
+
+        if not self._client:
+            raise Fl33tClientException()
 
         url = "/".join((self._base_url(), self.device_id))
 
@@ -102,6 +111,9 @@ class Device(BaseModel, OneBuildMixin, OneFleetMixin):
 
     def create(self):
         """Create this device in fl33t"""
+
+        if not self._client:
+            raise Fl33tClientException()
 
         url = self._base_url()
 
