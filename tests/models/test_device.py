@@ -1,5 +1,6 @@
 
 import copy
+import datetime
 import json
 import requests_mock
 
@@ -25,6 +26,11 @@ def test_create(fl33t_client):
 
     url = '{}/team/{}/device'.format(
             fl33t_client.base_uri, fl33t_client.team_id)
+
+    url = '/'.join((
+        fl33t_client.base_team_url(),
+        'device',
+    ))
 
     with requests_mock.Mocker() as mock:
         mock.post(url, text=json.dumps(create_response))
@@ -55,8 +61,11 @@ def test_delete(fl33t_client):
         }
     }
 
-    url = '{}/team/{}/device/{}'.format(
-            fl33t_client.base_uri, fl33t_client.team_id, device_id)
+    url = '/'.join((
+        fl33t_client.base_team_url(),
+        'device',
+        device_id
+    ))
 
     with requests_mock.Mocker() as mock:
         mock.get(url, text=json.dumps(get_response))
@@ -89,14 +98,17 @@ def test_list(fl33t_client):
         ]
     }
 
-    url = '{}/team/{}/devices'.format(
-            fl33t_client.base_uri, fl33t_client.team_id)
+    url = '/'.join((
+        fl33t_client.base_team_url(),
+        'devices'
+    ))
 
     with requests_mock.Mocker() as mock:
         mock.get(url, text=json.dumps(list_response))
         objs = []
         for obj in fl33t_client.list_devices():
             assert isinstance(obj, Device)
+            assert isinstance(obj.checkin_tstamp, datetime.datetime)
             objs.append(obj)
 
         assert len(objs) == 2
@@ -123,8 +135,11 @@ def test_update(fl33t_client):
     get_response['device']['name'] = "My Devices"
     get_response['device']['unreleased'] = False
 
-    url = '{}/team/{}/device/{}'.format(
-            fl33t_client.base_uri, fl33t_client.team_id, device_id)
+    url = '/'.join((
+        fl33t_client.base_team_url(),
+        'device',
+        device_id
+    ))
 
     with requests_mock.Mocker() as mock:
         mock.get(url, text=json.dumps(get_response))
@@ -188,3 +203,36 @@ def test_upgrade_available(fl33t_client):
         build = obj.upgrade_available()
         assert isinstance(build, Build)
         assert build.train_id == train_id
+
+
+def test_upgrade_not_available(fl33t_client):
+    device_id = 'asdf'
+    fleet_id = 'fdsa'
+    train_id = 'zxcv'
+
+    get_response = {
+        "device": {
+            "build_id": None,
+            "checkin_tstamp": "2018-03-31T22:31:08.836406Z",
+            "device_id": device_id,
+            "name": "My Device",
+            "fleet_id": fleet_id,
+            "session_token": "poiuytrewq"
+        }
+    }
+
+    url = '{}/team/{}/device/{}'.format(
+            fl33t_client.base_uri, fl33t_client.team_id, device_id)
+
+    build_url = '{}/build'.format(url)
+
+    with requests_mock.Mocker() as mock:
+        mock.get(url, text=json.dumps(get_response))
+        mock.get(build_url, status_code=204)
+
+        obj = fl33t_client.get_device(device_id)
+        assert isinstance(obj, Device)
+
+        build = obj.upgrade_available()
+        assert isinstance(build, bool)
+        assert build is False

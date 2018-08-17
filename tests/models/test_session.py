@@ -21,8 +21,10 @@ def test_create(fl33t_client):
         }
     }
 
-    url = '{}/team/{}/session'.format(
-            fl33t_client.base_uri, fl33t_client.team_id)
+    url = '/'.join((
+        fl33t_client.base_team_url(),
+        'session'
+    ))
 
     with requests_mock.Mocker() as mock:
         mock.post(url, text=json.dumps(create_response))
@@ -56,8 +58,11 @@ def test_delete(fl33t_client):
         }
     }
 
-    url = '{}/team/{}/session/{}'.format(
-            fl33t_client.base_uri, fl33t_client.team_id, session_token)
+    url = '/'.join((
+        fl33t_client.base_team_url(),
+        'session',
+        session_token
+    ))
 
     with requests_mock.Mocker() as mock:
         mock.get(url, text=json.dumps(get_response))
@@ -92,8 +97,10 @@ def test_list(fl33t_client):
         ]
     }
 
-    url = '{}/team/{}/sessions'.format(
-            fl33t_client.base_uri, fl33t_client.team_id)
+    url = '/'.join((
+        fl33t_client.base_team_url(),
+        'sessions'
+    ))
 
     with requests_mock.Mocker() as mock:
         mock.get(url, text=json.dumps(list_response))
@@ -125,8 +132,11 @@ def test_update(fl33t_client):
     get_response['session']['admin'] = False
     get_response['session']['device'] = True
 
-    url = '{}/team/{}/session/{}'.format(
-            fl33t_client.base_uri, fl33t_client.team_id, session_token)
+    url = '/'.join((
+        fl33t_client.base_team_url(),
+        'session',
+        session_token
+    ))
 
     with requests_mock.Mocker() as mock:
         mock.get(url, text=json.dumps(get_response))

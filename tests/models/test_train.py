@@ -1,5 +1,6 @@
 
 import copy
+import datetime
 import json
 import requests_mock
 
@@ -18,8 +19,10 @@ def test_create(fl33t_client):
         }
     }
 
-    url = '{}/team/{}/train'.format(
-            fl33t_client.base_uri, fl33t_client.team_id)
+    url = '/'.join((
+        fl33t_client.base_team_url(),
+        'train'
+    ))
 
     with requests_mock.Mocker() as mock:
         mock.post(url, text=json.dumps(create_response))
@@ -43,8 +46,11 @@ def test_delete(fl33t_client):
         }
     }
 
-    url = '{}/team/{}/train/{}'.format(
-            fl33t_client.base_uri, fl33t_client.team_id, train_id)
+    url = '/'.join((
+        fl33t_client.base_team_url(),
+        'train',
+        train_id
+    ))
 
     with requests_mock.Mocker() as mock:
         mock.get(url, text=json.dumps(get_response))
@@ -71,14 +77,17 @@ def test_list(fl33t_client):
         ]
     }
 
-    url = '{}/team/{}/trains'.format(
-            fl33t_client.base_uri, fl33t_client.team_id)
+    url = '/'.join((
+        fl33t_client.base_team_url(),
+        'trains'
+    ))
 
     with requests_mock.Mocker() as mock:
         mock.get(url, text=json.dumps(list_response))
         objs = []
         for obj in fl33t_client.list_trains():
             assert isinstance(obj, Train)
+            assert isinstance(obj.upload_tstamp, datetime.datetime)
             objs.append(obj)
 
         assert len(objs) == 2
@@ -102,8 +111,11 @@ def test_update(fl33t_client):
     get_response = copy.copy(update_response)
     get_response['train']['name'] = "My Train's Old Name"
 
-    url = '{}/team/{}/train/{}'.format(
-            fl33t_client.base_uri, fl33t_client.team_id, train_id)
+    url = '/'.join((
+        fl33t_client.base_team_url(),
+        'train',
+        train_id
+    ))
 
     with requests_mock.Mocker() as mock:
         mock.get(url, text=json.dumps(get_response))
