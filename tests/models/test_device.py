@@ -2,8 +2,10 @@
 import copy
 import datetime
 import json
+import pytest
 import requests_mock
 
+from fl33t.exceptions import DuplicateDeviceIdError
 from fl33t.models import Device, Build
 
 
@@ -188,10 +190,13 @@ def test_upgrade_available(fl33t_client):
         }
     }
 
-    url = '{}/team/{}/device/{}'.format(
-            fl33t_client.base_uri, fl33t_client.team_id, device_id)
+    url = '/'.join((
+        fl33t_client.base_team_url(),
+        'device',
+        device_id
+    ))
 
-    build_url = '{}/build'.format(url)
+    build_url = '/'.join((url, 'build'))
 
     with requests_mock.Mocker() as mock:
         mock.get(url, text=json.dumps(get_response))
@@ -221,10 +226,13 @@ def test_upgrade_not_available(fl33t_client):
         }
     }
 
-    url = '{}/team/{}/device/{}'.format(
-            fl33t_client.base_uri, fl33t_client.team_id, device_id)
+    url = '/'.join((
+        fl33t_client.base_team_url(),
+        'device',
+        device_id
+    ))
 
-    build_url = '{}/build'.format(url)
+    build_url = '/'.join((url, 'build'))
 
     with requests_mock.Mocker() as mock:
         mock.get(url, text=json.dumps(get_response))
@@ -236,3 +244,20 @@ def test_upgrade_not_available(fl33t_client):
         build = obj.upgrade_available()
         assert isinstance(build, bool)
         assert build is False
+
+
+def test_fail_duplicate_id(fl33t_client):
+    device_id = 'asdf'
+
+    device = fl33t_client.Device(device_id=device_id)
+
+    url = '/'.join((
+        fl33t_client.base_team_url(),
+        'device'
+    ))
+
+    with requests_mock.Mocker() as mock:
+        mock.post(url, status_code=409)
+
+        with pytest.raises(DuplicateDeviceIdError):
+             device.create()
