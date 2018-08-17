@@ -20,7 +20,7 @@ def session_token():
 
 
 @pytest.yield_fixture
-def fl33t_client(team_id, api_host):
+def fl33t_client(team_id, session_token, api_host):
     return Fl33tClient(
         team_id,
         session_token,
