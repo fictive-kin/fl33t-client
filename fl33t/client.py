@@ -33,6 +33,8 @@ from fl33t.models import (
 LOGGER = logging.getLogger(__name__)
 API_HOST = 'https://api.fl33t.com'
 
+ENDPOINT_FAILED_MSG = 'The fl33t endpoint for {} returned an invalid response'
+
 
 class Fl33tClient:  # pylint: disable=too-many-public-methods
     """
@@ -274,9 +276,6 @@ class Fl33tClient:  # pylint: disable=too-many-public-methods
         except requests.exceptions.HTTPError as exc:
             LOGGER.exception(exc)
 
-        if not result:
-            raise Fl33tApiException('The API call failed spectacularly')
-
         if result.status_code in [401, 403]:
             raise UnprivilegedToken(url)
 
@@ -308,6 +307,10 @@ class Fl33tClient:  # pylint: disable=too-many-public-methods
         params = self._build_offset_limit(offset=offset, limit=limit)
 
         result = self.get(url, params=params)
+
+        if 'sessions' not in result.json():
+            raise Fl33tApiException(ENDPOINT_FAILED_MSG.format(
+                'listing sessions'))
 
         for item in result.json()['sessions']:
             yield Session(client=self, **item)
@@ -342,15 +345,15 @@ class Fl33tClient:  # pylint: disable=too-many-public-methods
             session_token)))
 
         result = self.get(url)
-        if result:
-            if result.status_code in [400, 404]:
-                raise InvalidSessionIdError()
+        if result.status_code in [400, 404]:
+            raise InvalidSessionIdError()
 
-            if 'session' in result.json():
-                session = result.json()['session']
-                return Session(client=self, **session)
+        if 'session' in result.json():
+            session = result.json()['session']
+            return Session(client=self, **session)
 
-        raise Fl33tApiException('Could not retrieve session.')
+        raise Fl33tApiException(ENDPOINT_FAILED_MSG.format(
+            'session retrieval'))
 
     def get_fleet(self, fleet_id):
         """
@@ -367,16 +370,16 @@ class Fl33tClient:  # pylint: disable=too-many-public-methods
         url = "/".join((self.base_team_url(), 'fleet/{}'.format(fleet_id)))
 
         result = self.get(url)
-        if result:
-            if result.status_code in [400, 404]:
-                raise InvalidFleetIdError(fleet_id)
 
-            if 'fleet' in result.json():
-                fleet = result.json()['fleet']
-                return Fleet(client=self, **fleet)
+        if result.status_code in [400, 404]:
+            raise InvalidFleetIdError(fleet_id)
 
-        raise Fl33tApiException('Could not retrieve fleet: {}'.format(
-            fleet_id))
+        if 'fleet' in result.json():
+            fleet = result.json()['fleet']
+            return Fleet(client=self, **fleet)
+
+        raise Fl33tApiException(ENDPOINT_FAILED_MSG.format(
+            'fleet retrieval'))
 
     def get_build(self, train_id, build_id):
         """
@@ -395,17 +398,16 @@ class Fl33tClient:  # pylint: disable=too-many-public-methods
             train_id, build_id)))
 
         result = self.get(url)
-        if result:
-            if result.status_code in [400, 404]:
-                raise InvalidBuildIdError(build_id)
 
-            if 'build' in result.json():
-                build = result.json()['build']
-                return Build(client=self, **build)
+        if result.status_code in [400, 404]:
+            raise InvalidBuildIdError('train={}:{}'.format(train_id, build_id))
 
-        raise Fl33tApiException(
-            'Could not retrieve build: {} from train {}'.format(
-                build_id, train_id))
+        if 'build' in result.json():
+            build = result.json()['build']
+            return Build(client=self, **build)
+
+        raise Fl33tApiException(ENDPOINT_FAILED_MSG.format(
+            'build retrieval'))
 
     def get_train(self, train_id):
         """
@@ -423,16 +425,16 @@ class Fl33tClient:  # pylint: disable=too-many-public-methods
             train_id)))
 
         result = self.get(url)
-        if result:
-            if result.status_code == 400:
-                raise InvalidTrainIdError(train_id)
 
-            if 'train' in result.json():
-                train = result.json()['train']
-                return Train(client=self, **train)
+        if result.status_code == 400:
+            raise InvalidTrainIdError(train_id)
 
-        raise Fl33tApiException('Could not retrieve train: {}'.format(
-            train_id))
+        if 'train' in result.json():
+            train = result.json()['train']
+            return Train(client=self, **train)
+
+        raise Fl33tApiException(ENDPOINT_FAILED_MSG.format(
+            'train retrieval'))
 
     def get_device(self, device_id):
         """
@@ -450,16 +452,16 @@ class Fl33tClient:  # pylint: disable=too-many-public-methods
             device_id)))
 
         result = self.get(url)
-        if result:
-            if result.status_code == 400:
-                raise InvalidDeviceIdError(device_id)
 
-            if 'device' in result.json():
-                device = result.json()['device']
-                return Device(client=self, **device)
+        if result.status_code == 400:
+            raise InvalidDeviceIdError(device_id)
 
-        raise Fl33tApiException('Could not retrieve device: {}'.format(
-            device_id))
+        if 'device' in result.json():
+            device = result.json()['device']
+            return Device(client=self, **device)
+
+        raise Fl33tApiException(ENDPOINT_FAILED_MSG.format(
+            'device retrieval'))
 
     def has_upgrade_available(self, device_id, currently_installed_id=None):
         """
@@ -485,16 +487,17 @@ class Fl33tClient:  # pylint: disable=too-many-public-methods
             }
 
         result = self.get(url, params=params)
-        if result:
-            # No update available.
-            if result.status_code == 204:
-                return False
 
-            if 'build' in result.json():
-                build = result.json()['build']
-                return self.Build(**build)
+        # No update available.
+        if result.status_code == 204:
+            return False
 
-        raise Fl33tApiException('Could not check for firmware upgrade')
+        if 'build' in result.json():
+            build = result.json()['build']
+            return self.Build(**build)
+
+        raise Fl33tApiException(ENDPOINT_FAILED_MSG.format(
+            'device firmware check'))
 
     def list_fleets(self, train_id=None, offset=None, limit=None):
         """
@@ -522,8 +525,9 @@ class Fl33tClient:  # pylint: disable=too-many-public-methods
             params['train_id'] = train_id
 
         result = self.get(url, params=params)
-        if not result or 'fleets' not in result.json():
-            raise Fl33tApiException('Could not fetch fleets')
+        if 'fleets' not in result.json():
+            raise Fl33tApiException(ENDPOINT_FAILED_MSG.format(
+                'listing fleets'))
 
         for item in result.json()['fleets']:
             yield Fleet(client=self, **item)
@@ -548,8 +552,9 @@ class Fl33tClient:  # pylint: disable=too-many-public-methods
         params = self._build_offset_limit(offset=offset, limit=limit)
 
         result = self.get(url, params=params)
-        if not result or 'trains' not in result.json():
-            raise Fl33tApiException('Could not fetch trains')
+        if 'trains' not in result.json():
+            raise Fl33tApiException(ENDPOINT_FAILED_MSG.format(
+                'listing trains'))
 
         for item in result.json()['trains']:
             yield Train(client=self, **item)
@@ -579,8 +584,9 @@ class Fl33tClient:  # pylint: disable=too-many-public-methods
             params['fleet_id'] = fleet_id
 
         result = self.get(url, params=params)
-        if not result or 'devices' not in result.json():
-            raise Fl33tApiException('Could not fetch devices')
+        if 'devices' not in result.json():
+            raise Fl33tApiException(ENDPOINT_FAILED_MSG.format(
+                'listing devices'))
 
         for item in result.json()['devices']:
             yield Device(client=self, **item)
@@ -609,9 +615,9 @@ class Fl33tClient:  # pylint: disable=too-many-public-methods
             params['version'] = version
 
         result = self.get(url, params=params)
-        if not result or 'builds' not in result.json():
-            raise Fl33tApiException(
-                'Could not fetch builds for train: {}'.format(train_id))
+        if 'builds' not in result.json():
+            raise Fl33tApiException(ENDPOINT_FAILED_MSG.format(
+                'listing builds for train {}'.format(train_id)))
 
         for item in result.json()['builds']:
             yield Build(client=self, **item)
