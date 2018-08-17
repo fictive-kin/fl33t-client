@@ -6,13 +6,14 @@ All the models in use by Fl33t
 
 """
 
-from fl33t.exceptions import Fl33tClientException
+from fl33t.exceptions import InvalidSessionIdError
 from fl33t.models.base import BaseModel
 
 
 class Session(BaseModel):
     """The Fl33t Session model"""
 
+    _invalid_id = InvalidSessionIdError
     _booleans = ['admin', 'device', 'provisioning', 'readonly', 'upload']
 
     _defaults = {
@@ -53,52 +54,20 @@ class Session(BaseModel):
             self.session_token
         )
 
-    def _base_url(self):
-        """Build the base URL for actions"""
+    def id(self):
+        """
+        Get this session's unique ID
 
-        return '/'.join((self._client.base_team_url(), 'session'))
+        :returns: str
+        """
 
-    def update(self):
-        """Update this session"""
+        return self.session_token
 
-        if not self._client:
-            raise Fl33tClientException()
+    def _self_url(self):
+        """
+        The full URL for this session in fl33t
 
-        url = "/".join((self._base_url(), self.session_token))
+        :returns: str
+        """
 
-        result = self._client.put(url, data=self)
-        if not result or result.status_code != 204:
-            return False
-
-        return self
-
-    def delete(self):
-        """Delete this session"""
-
-        if not self._client:
-            raise Fl33tClientException()
-
-        url = "/".join((self._base_url(), self.session_token))
-
-        result = self._client.delete(url)
-        return result.status_code == 204
-
-    def create(self):
-        """Create this session in fl33t"""
-
-        if not self._client:
-            raise Fl33tClientException()
-
-        url = self._base_url()
-
-        result = self._client.post(url, data=self)
-        if not result or 'session' not in result.json():
-            self.logger.exception(
-                'Could not create session')
-            return False
-
-        data = result.json()['session']
-        for key in data.keys():
-            setattr(self, key, data[key])
-
-        return self
+        return '/'.join((self._base_url(), self.session_token))

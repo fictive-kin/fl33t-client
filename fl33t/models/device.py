@@ -21,7 +21,11 @@ from fl33t.models.mixins import (
 
 
 class Device(BaseModel, OneBuildMixin, OneFleetMixin):
-    """The Fl33t Device model"""
+    """
+    The Fl33t Device model
+    """
+
+    invalid_id = InvalidDeviceIdError
     _timestamps = ['checkin_tstamp']
 
     _defaults = {
@@ -42,8 +46,29 @@ class Device(BaseModel, OneBuildMixin, OneFleetMixin):
                               'to generate and ID'))
         super().__init__(client=client, **kwargs)
 
+    def id(self):
+        """
+        Get this Device's unique ID
+
+        :returns: str
+        """
+
+        return self.device_id
+
     def upgrade_available(self, installed_build_id=None):
-        """Returns the available firmware update, if there is one"""
+        """
+        Returns the available firmware update, if there is one
+
+        :param installed_build_id: The currently installed build ID, if known
+        :type installed_build_id: str or None
+        :returns: :py:class:`fl33t.models.Build`, if upgrade available or
+            False, if none
+        :raises UnprivilegedToken: if the session token does not have enough
+            privilege to perform this action
+        :raises Fl33tApiException: if there was a 5xx error returned by fl33t
+        :raises Fl33tClientException: if the model was instantiated without a
+            :py:class:`fl33t.Fl33tClient`
+        """
 
         if not self._client:
             raise Fl33tClientException()
@@ -75,42 +100,30 @@ class Device(BaseModel, OneBuildMixin, OneFleetMixin):
                     )
                 )
 
-    def _base_url(self):
-        """Build the base URL for actions"""
+    def _self_url(self):
+        """
+        The full URL for this object in fl33t
 
-        return '/'.join((self._client.base_team_url(), 'device'))
+        :returns: str
+        """
 
-    def update(self):
-        """Update this device"""
-
-        if not self._client:
-            raise Fl33tClientException()
-
-        url = "/".join((self._base_url(), self.device_id))
-
-        result = self._client.put(url, data=self)
-        if not result or result.status_code != 204:
-            return False
-
-        return self
-
-    def delete(self):
-        """Delete this device"""
-
-        if not self._client:
-            raise Fl33tClientException()
-
-        url = "/".join((self._base_url(), self.device_id))
-
-        result = self._client.delete(url)
-
-        if result.status_code == 400:
-            raise InvalidDeviceIdError(self.device_id)
-
-        return result.status_code == 204
+        return '/'.join((
+            self._base_url(),
+            self.device_id
+        ))
 
     def create(self):
-        """Create this device in fl33t"""
+        """
+        Create this device in fl33t
+
+        :returns: :py:class:`self`, on success or False, on failure
+        :raises DuplicateDeviceIdError: if the device ID already exists
+        :raises UnprivilegedToken: if the session token does not have enough
+            privilege to perform this action
+        :raises Fl33tApiException: if there was a 5xx error returned by fl33t
+        :raises Fl33tClientException: if the model was instantiated without a
+            :py:class:`fl33t.Fl33tClient`
+        """
 
         if not self._client:
             raise Fl33tClientException()
@@ -118,10 +131,6 @@ class Device(BaseModel, OneBuildMixin, OneFleetMixin):
         url = self._base_url()
 
         result = self._client.post(url, data=self)
-        if not result:
-            self.logger.exception('Could not create device')
-            return False
-
         if result.status_code == 409:
             raise DuplicateDeviceIdError(self.device_id)
 

@@ -77,41 +77,56 @@ class Fl33tClient:  # pylint: disable=too-many-public-methods
 
     def Build(self, **kwargs):  # pylint: disable=invalid-name
         """
-        Get a client connected build object
+        Get a Build object pre-initialised with this API client
 
-        :returns: :py:class:`fl33t.models.build.Build`
+        Allowed parameters are documented on the
+            :py:class:`fleet.models.Build` class
+
+        :returns: :py:class:`fl33t.models.Build`
         """
         return Build(client=self, **kwargs)
 
     def Device(self, **kwargs):  # pylint: disable=invalid-name
         """
-        Get a client connected device object
+        Get a Device object pre-initialised with this API client
 
-        :returns: :py:class:`fl33t.models.device.Device`
+        Allowed parameters are documented on the
+            :py:class:`fleet.models.Device` class
+
+        :returns: :py:class:`fl33t.models.Device`
         """
         return Device(client=self, **kwargs)
 
     def Fleet(self, **kwargs):  # pylint: disable=invalid-name
         """
-        Get a client connected fleet object
+        Get a Fleet object pre-initialised with this API client
 
-        :returns: :py:class:`fl33t.models.fleet.Fleet`
+        Allowed parameters are documented on the
+            :py:class:`fleet.models.Fleet` class
+
+        :returns: :py:class:`fl33t.models.Fleet`
         """
         return Fleet(client=self, **kwargs)
 
     def Train(self, **kwargs):  # pylint: disable=invalid-name
         """
-        Get a client connected train object
+        Get a Train object pre-initialised with this API client
 
-        :returns: :py:class:`fl33t.models.train.Train`
+        Allowed parameters are documented on the
+            :py:class:`fleet.models.Train` class
+
+        :returns: :py:class:`fl33t.models.Train`
         """
         return Train(client=self, **kwargs)
 
     def Session(self, **kwargs):  # pylint: disable=invalid-name
         """
-        Get a client connected session object
+        Get a Session object pre-initialised with this API client
 
-        :returns::py:class:`fl33t.models.session.Session`
+        Allowed parameters are documented on the
+            :py:class:`fleet.models.Session` class
+
+        :returns::py:class:`fl33t.models.Session`
         """
         return Session(client=self, **kwargs)
 
@@ -142,16 +157,24 @@ class Fl33tClient:  # pylint: disable=too-many-public-methods
             limit = self.default_query_limit
 
         return {
-            'offset': offset,
-            'limit': limit
+            'offset': int(offset),
+            'limit': int(limit)
         }
 
-    def generate_id_string(self):
+    def generate_id_string(self, length=None):
         """
         Generate random string for use in Fl33t ids.
 
+        :param length: The length of the returned random string. If not
+            provided, it defaults to the value of
+            :py:attr:`self.generated_id_length`
+        :type length: int or None
         :returns: str
         """
+
+        if not length:
+            length = self.generated_id_length
+
         return ''.join(random.SystemRandom().choice(
             string.ascii_lowercase + string.digits) for _ in range(
                 self.generated_id_length))
@@ -163,6 +186,9 @@ class Fl33tClient:  # pylint: disable=too-many-public-methods
         :param str url: The URL to request
         :param kwargs: Any keyword args that :py:class:`requests.get` accepts
         :returns: :py:class:`requests.Response`
+        :raises UnprivilegedToken: if the session token does not have enough
+            privilege to perform this action
+        :raises Fl33tApiException: if there was a 5xx error returned by fl33t
         """
         return self._request('GET', url, **kwargs)
 
@@ -173,6 +199,9 @@ class Fl33tClient:  # pylint: disable=too-many-public-methods
         :param str url: The URL to request
         :param kwargs: Any keyword args that :py:class:`requests.post` accepts
         :returns: :py:class:`requests.Response`
+        :raises UnprivilegedToken: if the session token does not have enough
+            privilege to perform this action
+        :raises Fl33tApiException: if there was a 5xx error returned by fl33t
         """
         return self._request('POST', url, **kwargs)
 
@@ -183,6 +212,9 @@ class Fl33tClient:  # pylint: disable=too-many-public-methods
         :param str url: The URL to request
         :param kwargs: Any keyword args that :py:class:`requests.put` accepts
         :returns: :py:class:`requests.Response`
+        :raises UnprivilegedToken: if the session token does not have enough
+            privilege to perform this action
+        :raises Fl33tApiException: if there was a 5xx error returned by fl33t
         """
         return self._request('PUT', url, **kwargs)
 
@@ -195,7 +227,7 @@ class Fl33tClient:  # pylint: disable=too-many-public-methods
             accepts
         :returns: :py:class:`requests.Response`
         :raises UnprivilegedToken: if the session token does not have enough
-            privilege to view the session information
+            privilege to perform this action
         :raises Fl33tApiException: if there was a 5xx error returned by fl33t
         """
         return self._request('DELETE', url, **kwargs)
@@ -210,9 +242,9 @@ class Fl33tClient:  # pylint: disable=too-many-public-methods
         :param str url: The URL to request
         :param kwargs: Any keyword args that :py:module:`requests` methods
             accept
-        :returns: :py:class:`requests.Response` or False
+        :returns: :py:class:`requests.Response`
         :raises UnprivilegedToken: if the session token does not have enough
-            privilege to view the session information
+            privilege to perform this action
         :raises Fl33tApiException: if there was a 5xx error returned by fl33t
         """
 
@@ -243,9 +275,9 @@ class Fl33tClient:  # pylint: disable=too-many-public-methods
             LOGGER.exception(exc)
 
         if not result:
-            return False
+            raise Fl33tApiException('The API call failed spectacularly')
 
-        if result.status_code == 403:
+        if result.status_code in [401, 403]:
             raise UnprivilegedToken(url)
 
         if result.status_code >= 500:
@@ -267,9 +299,9 @@ class Fl33tClient:  # pylint: disable=too-many-public-methods
         :param limit: If provided, the number of records to return.
             Defaults to :py:attr:`default_query_limit`
         :type limit: int or None
-        :yields: generator of `fl33t.models.session.Session`
+        :yields: generator of `fl33t.models.Session`
         :raises UnprivilegedToken: if the session token does not have enough
-            privilege to view the session information
+            privilege to perform this action
         :raises Fl33tApiException: if there was a 5xx error returned by fl33t
         """
         url = "/".join((self.base_team_url(), 'sessions'))
@@ -284,10 +316,10 @@ class Fl33tClient:  # pylint: disable=too-many-public-methods
         """
         Return information about the current token
 
-        :returns: :py:class:`fl33t.models.session.Session`
+        :returns: :py:class:`fl33t.models.Session`
         :raises InvalidSessionIdError: if the session token does not exist
         :raises UnprivilegedToken: if the session token does not have enough
-            privilege to view the session information
+            privilege to perform this action
         :raises Fl33tApiException: if there was a 5xx error returned by fl33t
         """
 
@@ -299,10 +331,10 @@ class Fl33tClient:  # pylint: disable=too-many-public-methods
 
         :param str session_token: The session token that you want information
             about
-        :returns: :py:class:`fl33t.models.session.Session`
+        :returns: :py:class:`fl33t.models.Session`
         :raises InvalidSessionIdError: if the session token does not exist
         :raises UnprivilegedToken: if the session token does not have enough
-            privilege to view the session information
+            privilege to perform this action
         :raises Fl33tApiException: if there was a 5xx error returned by fl33t
         """
 
@@ -325,10 +357,10 @@ class Fl33tClient:  # pylint: disable=too-many-public-methods
         Return information about a specific fleet
 
         :param str fleet_id: The fleet ID to retrieve information for
-        :returns: :py:class:`fl33t.models.fleet.Fleet`
+        :returns: :py:class:`fl33t.models.Fleet`
         :raises InvalidFleetIdError: if the fleet does not exist
         :raises UnprivilegedToken: if the session token does not have enough
-            privilege to view the session information
+            privilege to perform this action
         :raises Fl33tApiException: if there was a 5xx error returned by fl33t
         """
 
@@ -352,10 +384,10 @@ class Fl33tClient:  # pylint: disable=too-many-public-methods
 
         :param str train_id: The train ID that owns the provided build ID
         :param str build_id: The build ID to retrieve information for
-        :returns: :py:class:`fl33t.models.build.Build`
+        :returns: :py:class:`fl33t.models.Build`
         :raises InvalidBuildIdError: if the build does not exist
         :raises UnprivilegedToken: if the session token does not have enough
-            privilege to view the session information
+            privilege to perform this action
         :raises Fl33tApiException: if there was a 5xx error returned by fl33t
         """
 
@@ -380,10 +412,10 @@ class Fl33tClient:  # pylint: disable=too-many-public-methods
         Return information about a specific train
 
         :param str train_id: The train ID to retrieve information for
-        :returns: :py:class:`fl33t.models.train.Train`
+        :returns: :py:class:`fl33t.models.Train`
         :raises InvalidTrainIdError: if the train does not exist
         :raises UnprivilegedToken: if the session token does not have enough
-            privilege to view the session information
+            privilege to perform this action
         :raises Fl33tApiException: if there was a 5xx error returned by fl33t
         """
 
@@ -407,10 +439,10 @@ class Fl33tClient:  # pylint: disable=too-many-public-methods
         Get a device by ID from Fleet.
 
         :param str device_id: The device ID to retrieve information for
-        :returns: :py:class:`fl33t.models.device.Device`
+        :returns: :py:class:`fl33t.models.Device`
         :raises InvalidDeviceIdError: if the device does not exist
         :raises UnprivilegedToken: if the session token does not have enough
-            privilege to view the session information
+            privilege to perform this action
         :raises Fl33tApiException: if there was a 5xx error returned by fl33t
         """
 
@@ -437,9 +469,9 @@ class Fl33tClient:  # pylint: disable=too-many-public-methods
         :param currently_installed_id: If provided, the build ID currently
             installed on the device
         :type currently_installed_id: str or None
-        :returns: :py:class:`fl33t.models.build.Build` or False
+        :returns: :py:class:`fl33t.models.Build` or False
         :raises UnprivilegedToken: if the session token does not have enough
-            privilege to view the session information
+            privilege to perform this action
         :raises Fl33tApiException: if there was a 5xx error returned by fl33t
         """
 
@@ -477,9 +509,9 @@ class Fl33tClient:  # pylint: disable=too-many-public-methods
         :param limit: If provided, the number of records to return.
             Defaults to :py:attr:`default_query_limit`
         :type limit: int or None
-        :yields: generator of :py:class:`fl33t.models.fleet.Fleet`
+        :yields: generator of :py:class:`fl33t.models.Fleet`
         :raises UnprivilegedToken: if the session token does not have enough
-            privilege to view the session information
+            privilege to perform this action
         :raises Fl33tApiException: if there was a 5xx error returned by fl33t
         """
 
@@ -506,9 +538,9 @@ class Fl33tClient:  # pylint: disable=too-many-public-methods
         :param limit: If provided, the number of records to return.
             Defaults to :py:attr:`default_query_limit`
         :type limit: int or None
-        :yields: generator of :py:class:`fl33t.models.train.Train`
+        :yields: generator of :py:class:`fl33t.models.Train`
         :raises UnprivilegedToken: if the session token does not have enough
-            privilege to view the session information
+            privilege to perform this action
         :raises Fl33tApiException: if there was a 5xx error returned by fl33t
         """
 
@@ -535,9 +567,9 @@ class Fl33tClient:  # pylint: disable=too-many-public-methods
         :param limit: If provided, the number of records to return.
             Defaults to :py:attr:`default_query_limit`
         :type limit: int or None
-        :yields: generator of :py:class:`fl33t.models.device.Device`
+        :yields: generator of :py:class:`fl33t.models.Device`
         :raises UnprivilegedToken: if the session token does not have enough
-            privilege to view the session information
+            privilege to perform this action
         :raises Fl33tApiException: if there was a 5xx error returned by fl33t
         """
 
@@ -564,9 +596,9 @@ class Fl33tClient:  # pylint: disable=too-many-public-methods
         :param limit: If provided, the number of records to return.
             Defaults to :py:attr:`default_query_limit`
         :type limit: int or None
-        :yields: generator of :py:class:`fl33t.models.build.Build`
+        :yields: generator of :py:class:`fl33t.models.Build`
         :raises UnprivilegedToken: if the session token does not have enough
-            privilege to view the session information
+            privilege to perform this action
         :raises Fl33tApiException: if there was a 5xx error returned by fl33t
         """
 

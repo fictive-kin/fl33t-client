@@ -9,14 +9,18 @@ import os
 
 import requests
 
-from fl33t.exceptions import Fl33tClientException
+from fl33t.exceptions import Fl33tClientException, InvalidBuildIdError
 from fl33t.models.base import BaseModel
 from fl33t.models.mixins import OneTrainMixin
 from fl33t.utils import md5
 
 
 class Build(BaseModel, OneTrainMixin):
-    """The Fl33t Build model"""
+    """
+    The Fl33t Build model
+    """
+
+    _invalid_id = InvalidBuildIdError
 
     _booleans = ['released']
     _enums = {
@@ -75,8 +79,36 @@ class Build(BaseModel, OneTrainMixin):
             self.upload_tstamp
             )
 
+    def id(self):
+        """
+        Get this build's unique ID
+
+        :returns: str
+        """
+
+        return 'train={}:{}'.format(
+            self.train_id,
+            self.build_id
+        )
+
+    def _self_url(self):
+        """
+        The full URL for this build in fl33t
+
+        :returns: str
+        """
+
+        return '/'.join((
+            self._base_url(),
+            self.build_id
+        ))
+
     def _base_url(self):
-        """Build the base URL for actions"""
+        """
+        Get the base URL for build actions
+
+        :returns: str
+        """
 
         return '/'.join((
             self._client.base_team_url(),
@@ -85,33 +117,17 @@ class Build(BaseModel, OneTrainMixin):
             )
         ))
 
-    def update(self):
-        """Update this build"""
-
-        if not self._client:
-            raise Fl33tClientException()
-
-        url = "/".join((self._base_url(), self.build_id))
-
-        result = self._client.put(url, data=self)
-        if not result or result.status_code != 204:
-            return False
-
-        return self
-
-    def delete(self):
-        """Delete this build from a Fl33t train"""
-
-        if not self._client:
-            raise Fl33tClientException()
-
-        url = "/".join((self._base_url(), self.build_id))
-
-        result = self._client.delete(url)
-        return result.status_code == 204
-
     def create(self):
-        """Create this build record in fl33t and upload the new build file"""
+        """
+        Create this build record in fl33t and upload the new build file
+
+        :returns: :py:class:`self`, on success or False, on failure
+        :raises UnprivilegedToken: if the session token does not have enough
+            privilege to perform this action
+        :raises Fl33tApiException: if there was a 5xx error returned by fl33t
+        :raises Fl33tClientException: if the model was instantiated without a
+            :py:class:`fl33t.Fl33tClient`
+        """
 
         if not self._client:
             raise Fl33tClientException()
@@ -119,15 +135,17 @@ class Build(BaseModel, OneTrainMixin):
         url = self._base_url()
 
         result = self._client.post(url, data=self)
-        if not result or 'build' not in result.json():
+        if 'build' not in result.json():
             self.logger.exception(
                 'Could not create build for: {}'.format(self.version))
             return False
 
         data = result.json()['build']
         for key in data.keys():
-            if key == 'filename':
+            if key in ['filename', 'size']:
                 # Allowing the filename to be overridden will break the upload
+                # and size is unknown to the fl33t API at this point, so leave
+                # it as was passed in to (or determined by) the object
                 continue
             setattr(self, key, data[key])
 

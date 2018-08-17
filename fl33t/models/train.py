@@ -6,7 +6,7 @@ Train Model
 
 import datetime
 
-from fl33t.exceptions import Fl33tClientException
+from fl33t.exceptions import InvalidTrainIdError
 from fl33t.models.base import BaseModel
 from fl33t.models.mixins import (
     ManyBuildsMixin,
@@ -15,7 +15,11 @@ from fl33t.models.mixins import (
 
 
 class Train(BaseModel, ManyFleetsMixin, ManyBuildsMixin):
-    """The Fl33t Train model"""
+    """
+    The Fl33t Train model
+    """
+
+    _invalid_id = InvalidTrainIdError
 
     _timestamps = ['upload_tstamp']
 
@@ -35,51 +39,20 @@ class Train(BaseModel, ManyFleetsMixin, ManyBuildsMixin):
             self.upload_tstamp
         )
 
-    def _base_url(self):
-        """Build the base URL for actions"""
+    def id(self):
+        """
+        Get this train's unique ID
 
-        return '/'.join((self._client.base_team_url(), 'train'))
+        :returns: str
+        """
 
-    def update(self):
-        """Update this train"""
+        return self.train_id
 
-        if not self._client:
-            raise Fl33tClientException()
+    def _self_url(self):
+        """
+        The full URL for this train in fl33t
 
-        url = "/".join((self._base_url(), self.train_id))
+        :returns: str
+        """
 
-        result = self._client.put(url, data=self)
-        if not result or result.status_code != 204:
-            return False
-
-        return self
-
-    def delete(self):
-        """Delete this train"""
-
-        if not self._client:
-            raise Fl33tClientException()
-
-        url = "/".join((self._base_url(), self.train_id))
-
-        result = self._client.delete(url)
-        return result.status_code == 204
-
-    def create(self):
-        """Create this train in fl33t"""
-
-        if not self._client:
-            raise Fl33tClientException()
-
-        url = self._base_url()
-
-        result = self._client.post(url, data=self)
-        if not result or 'train' not in result.json():
-            self.logger.exception('Could not create train')
-            return False
-
-        data = result.json()['train']
-        for key in data.keys():
-            setattr(self, key, data[key])
-
-        return self
+        return '/'.join((self._base_url(), self.train_id))
