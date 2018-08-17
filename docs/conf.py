@@ -16,18 +16,18 @@ import os
 import sys
 
 sys.path.insert(0, os.path.abspath('..'))
-from setup import version as setupVersion
+from setup import name as project, author, version
 
 # -- Project information -----------------------------------------------------
 
-project = 'fl33t'
-copyright = '2018, Fictive Kin LLC'
-author = 'Fictive Kin LLC'
+#project = 'fl33t'
+copyright = '2018, {}'.format(author)
+#author = 'Fictive Kin LLC'
 
 # The short X.Y version
-version = setupVersion
+# version = ''
 # The full version, including alpha/beta/rc tags
-release = setupVersion
+release = version
 
 
 # -- General configuration ---------------------------------------------------

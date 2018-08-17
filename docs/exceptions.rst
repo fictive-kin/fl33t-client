@@ -3,8 +3,8 @@ Exceptions
 
 These are the exceptions in use within the fl33t module.
 
-Generic Exceptions
-------------------
+Generic
+-------
 
 .. autoclass:: fl33t.exceptions.UnprivilegedToken
 
@@ -15,31 +15,23 @@ Generic Exceptions
 .. autoclass:: fl33t.exceptions.Fl33tClientException
 
 
-Build Exceptions
-----------------
-
-.. autoclass:: fl33t.exceptions.InvalidBuildIdError
-
-
-Device Exceptions
------------------
-
-.. autoclass:: fl33t.exceptions.InvalidDeviceIdError
+Model Related
+-------------
 
 .. autoclass:: fl33t.exceptions.DuplicateDeviceIdError
 
-Fleet Exceptions
-----------------
+.. autoclass:: fl33t.exceptions.InvalidDeviceIdError
+
+.. autoclass:: fl33t.exceptions.InvalidBuildIdError
 
 .. autoclass:: fl33t.exceptions.InvalidFleetIdError
 
-Train Exceptions
-----------------
-
 .. autoclass:: fl33t.exceptions.InvalidTrainIdError
-
-Session Exceptions
-------------------
 
 .. autoclass:: fl33t.exceptions.InvalidSessionIdError
 
+
+Base Exceptions
+---------------
+
+.. autoclass:: fl33t.exceptions.InvalidIdError

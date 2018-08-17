@@ -10,27 +10,32 @@ class DuplicateDeviceIdError(Exception):
     pass
 
 
-class InvalidFleetIdError(Exception):
+class InvalidIdError(Exception):
+    """A generic invalid ID error that all other invalid ID errors inherit"""
+    pass
+
+
+class InvalidFleetIdError(InvalidIdError):
     """No fleet by that ID exists in Fleet."""
     pass
 
 
-class InvalidBuildIdError(Exception):
+class InvalidBuildIdError(InvalidIdError):
     """No build by that ID exists in Fleet."""
     pass
 
 
-class InvalidTrainIdError(Exception):
+class InvalidTrainIdError(InvalidIdError):
     """No train by that ID exists in Fleet."""
     pass
 
 
-class InvalidDeviceIdError(Exception):
+class InvalidDeviceIdError(InvalidIdError):
     """No device by that ID exists in Fleet."""
     pass
 
 
-class InvalidSessionIdError(Exception):
+class InvalidSessionIdError(InvalidIdError):
     """No session by that ID exists in Fleet."""
     pass
 
