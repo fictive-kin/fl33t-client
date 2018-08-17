@@ -16,5 +16,6 @@ The documentation is built using Sphinx_.
    :caption: Contents:
 
    getting_started
+   contributing
    reference
 

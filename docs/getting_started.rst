@@ -12,7 +12,7 @@ left up to the reader.
 Basic Tutorial
 --------------
 
-Create a `Fl33tClient`::
+Create a :py:class:`fl33t.Fl33tClient`::
 
     from fl33t import Fl33tClient
 
