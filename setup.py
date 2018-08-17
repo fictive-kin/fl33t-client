@@ -10,7 +10,7 @@ def readme():
 name = 'fl33t'
 description = 'Fl33t API Client'
 version = '0.3.4'
-author = 'Fictive Kin LLC',
+author = 'Fictive Kin LLC'
 email = 'hello@fictivekin.com'
 classifiers = [
     'Development Status :: 3 - Alpha',
