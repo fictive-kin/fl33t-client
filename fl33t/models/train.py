@@ -16,7 +16,7 @@ from fl33t.models.mixins import (
 
 class Train(BaseModel, ManyFleetsMixin, ManyBuildsMixin):
     """
-    The Fl33t Train model
+    The fl33t Train model
     """
 
     _invalid_id = InvalidTrainIdError
