@@ -2,7 +2,7 @@
 
 Models
 
-All the models in use by Fl33t
+All the models in use by fl33t
 
 """
 
@@ -16,7 +16,7 @@ from fl33t.models.mixins import (
 
 
 class Fleet(BaseModel, OneTrainMixin, OneBuildMixin, ManyDevicesMixin):
-    """The Fl33t Fleet model"""
+    """The fl33t Fleet model"""
 
     _invalid_id = InvalidFleetIdError
 
