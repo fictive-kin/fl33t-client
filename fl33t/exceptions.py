@@ -50,7 +50,7 @@ class UnprivilegedToken(Exception):
 
 
 class Fl33tApiException(Exception):
-    """The Fl33t API returned an exception handling our request"""
+    """The fl33t API returned an exception handling our request"""
     pass
 
 
