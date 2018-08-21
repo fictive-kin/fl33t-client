@@ -1,5 +1,5 @@
-Reference
-=========
+Client
+======
 
 .. autoclass:: fl33t.Fl33tClient
     :members:
