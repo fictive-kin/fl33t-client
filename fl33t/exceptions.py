@@ -6,7 +6,7 @@ All exceptions used by the fl33t client
 
 
 class DuplicateDeviceIdError(Exception):
-    """A device by that ID already exists in Fleet."""
+    """A device by that ID already exists in fl33t."""
     pass
 
 
@@ -16,27 +16,27 @@ class InvalidIdError(Exception):
 
 
 class InvalidFleetIdError(InvalidIdError):
-    """No fleet by that ID exists in Fleet."""
+    """No fleet by that ID exists in fl33t."""
     pass
 
 
 class InvalidBuildIdError(InvalidIdError):
-    """No build by that ID exists in Fleet."""
+    """No build by that ID exists in fl33t."""
     pass
 
 
 class InvalidTrainIdError(InvalidIdError):
-    """No train by that ID exists in Fleet."""
+    """No train by that ID exists in fl33t."""
     pass
 
 
 class InvalidDeviceIdError(InvalidIdError):
-    """No device by that ID exists in Fleet."""
+    """No device by that ID exists in fl33t."""
     pass
 
 
 class InvalidSessionIdError(InvalidIdError):
-    """No session by that ID exists in Fleet."""
+    """No session by that ID exists in fl33t."""
     pass
 
 
