@@ -1,7 +1,7 @@
 """
 BaseModel
 
-Has all common methods for Fl33t models
+Has all common methods for fl33t models
 """
 
 import datetime
@@ -16,7 +16,7 @@ from fl33t.utils import ExtendedEncoder
 
 
 class BaseModel(ABC):
-    """The base model from which all Fl33t models should be extended"""
+    """The base model from which all fl33t models should be extended"""
 
     _invalid_id = InvalidIdError
     _data = {}
