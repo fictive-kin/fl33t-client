@@ -1,7 +1,7 @@
 """
 Mixins
 
-Reusable pieces for Fl33t models
+Reusable pieces for fl33t models
 """
 
 
