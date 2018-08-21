@@ -17,7 +17,7 @@ from fl33t.utils import md5
 
 class Build(BaseModel, OneTrainMixin):
     """
-    The Fl33t Build model
+    The fl33t Build model
     """
 
     _invalid_id = InvalidBuildIdError
