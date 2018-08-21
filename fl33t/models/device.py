@@ -2,7 +2,7 @@
 
 Models
 
-All the models in use by Fl33t
+All the models in use by fl33t
 
 """
 
@@ -22,7 +22,7 @@ from fl33t.models.mixins import (
 
 class Device(BaseModel, OneBuildMixin, OneFleetMixin):
     """
-    The Fl33t Device model
+    The fl33t Device model
     """
 
     invalid_id = InvalidDeviceIdError
@@ -116,7 +116,7 @@ class Device(BaseModel, OneBuildMixin, OneFleetMixin):
         """
         Create this device in fl33t
 
-        :returns: :py:class:`self`, on success or False, on failure
+        :returns: :py:class:`self` on success, or False on failure
         :raises DuplicateDeviceIdError: if the device ID already exists
         :raises UnprivilegedToken: if the session token does not have enough
             privilege to perform this action

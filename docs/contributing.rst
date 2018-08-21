@@ -14,7 +14,7 @@ Testing
 -------
 
 Once you have written your new feature into the module, and have created a
-test for it, you need to run the test. In order to run the tests, you must
+test for it, please run the test. In order to run tests, you must
 have tox_ installed::
 
      pip install tox
@@ -23,7 +23,7 @@ Then you can run it by simply typing::
 
      tox
 
-Tox will create a virtual environment specifically for the testing, so if you
+Tox will create a virtual environment specifically for testing, so if you
 have added requirements, ensure that they are listed in the `requirements.txt`
 file and in the setup for distribution.
 
@@ -35,8 +35,8 @@ If it is a requirement only for testing, it should be listed in the
 Documentation
 -------------
 
-You do not need to create a virtual environment with all the of the fl33t
-dependencies to do documentation. Install the requirements listed in the
+You do not need to create a virtual environment with all of the fl33t
+dependencies to update documentation. Install the requirements listed in the
 `requirements-docs.txt` file, and make your documentation changes. To
 preview the documentation, run::
 

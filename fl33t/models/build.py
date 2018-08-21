@@ -17,7 +17,7 @@ from fl33t.utils import md5
 
 class Build(BaseModel, OneTrainMixin):
     """
-    The Fl33t Build model
+    The fl33t Build model
     """
 
     _invalid_id = InvalidBuildIdError
@@ -121,7 +121,7 @@ class Build(BaseModel, OneTrainMixin):
         """
         Create this build record in fl33t and upload the new build file
 
-        :returns: :py:class:`self`, on success or False, on failure
+        :returns: :py:class:`self` on success, or False on failure
         :raises UnprivilegedToken: if the session token does not have enough
             privilege to perform this action
         :raises Fl33tApiException: if there was a 5xx error returned by fl33t
