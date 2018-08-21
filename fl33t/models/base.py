@@ -135,7 +135,7 @@ class BaseModel(ABC):
         """
         Update this object in fl33t
 
-        :returns: :py:class:`self`, on success or False, on update failure
+        :returns: :py:class:`self` on success, or False on update failure
         :raises UnprivilegedToken: if the session token does not have enough
             privilege to perform this action
         :raises Fl33tApiException: if there was a 5xx error returned by fl33t
@@ -161,7 +161,7 @@ class BaseModel(ABC):
         """
         Delete this object from a fl33t
 
-        :returns: True, on success or False, on failure
+        :returns: True on success, or False on failure
         :raises UnprivilegedToken: if the session token does not have enough
             privilege to perform this action
         :raises Fl33tApiException: if there was a 5xx error returned by fl33t
