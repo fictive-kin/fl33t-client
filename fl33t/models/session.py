@@ -2,7 +2,7 @@
 
 Models
 
-All the models in use by Fl33t
+All the models in use by fl33t
 
 """
 
@@ -11,7 +11,7 @@ from fl33t.models.base import BaseModel
 
 
 class Session(BaseModel):
-    """The Fl33t Session model"""
+    """The fl33t Session model"""
 
     _invalid_id = InvalidSessionIdError
     _booleans = ['admin', 'device', 'provisioning', 'readonly', 'upload']
@@ -27,7 +27,7 @@ class Session(BaseModel):
     }
 
     def priv(self):
-        """Return a human readable privilege"""
+        """Return a human-readable privilege"""
         if self.admin:
             return 'admin'
         if self.device:
