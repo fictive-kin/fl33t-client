@@ -1,5 +1,5 @@
 """
-Fl33t Client
+fl33t Client
 ============
 
 The main client class that is used to interact with fl33t.
@@ -38,9 +38,9 @@ ENDPOINT_FAILED_MSG = 'The fl33t endpoint for {} returned an invalid response'
 
 class Fl33tClient:  # pylint: disable=too-many-public-methods
     """
-    Handles all Fl33t-related interactions.
+    Handles all fl33t-related interactions.
 
-    Fl33t is used for managing firmware build trains.
+    fl33t is used for managing firmware build trains.
 
     REST API docs: https://www.fl33t.com/docs/rest
     """
@@ -165,7 +165,7 @@ class Fl33tClient:  # pylint: disable=too-many-public-methods
 
     def generate_id_string(self, length=None):
         """
-        Generate random string for use in Fl33t ids.
+        Generate random string for use in fl33t ids.
 
         :param length: The length of the returned random string. If not
             provided, it defaults to the value of
@@ -438,7 +438,7 @@ class Fl33tClient:  # pylint: disable=too-many-public-methods
 
     def get_device(self, device_id):
         """
-        Get a device by ID from Fleet.
+        Get a device by ID from fl33t.
 
         :param str device_id: The device ID to retrieve information for
         :returns: :py:class:`fl33t.models.Device`
