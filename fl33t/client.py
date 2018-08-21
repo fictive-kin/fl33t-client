@@ -593,7 +593,7 @@ class Fl33tClient:  # pylint: disable=too-many-public-methods
 
     def list_builds(self, train_id, version=None, offset=None, limit=None):
         """
-        Get all builds from fl33t, by train id.
+        Get all builds from fl33t by train id.
 
         :param int train_id: The train_id that the builds are part of
         :param offset: If provided, the starting offset for result sets.
