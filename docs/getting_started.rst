@@ -1,13 +1,13 @@
 Getting Started
 ===============
 
-You must already have a valid fl33t account, in order to use this client.
+In order to use this client, you must already have a valid fl33t account.
 You will need to know the `team_id` assigned to you by fl33t, and you will
 need to create a session token within the fl33t console for you to use with
-this client. Various privilege levels are available, most non-informational
+this client. Various privilege levels are available. Most non-informational
 interactions will require that the session token have `admin` privileges, but
 the selection of the specific privilege to assign to this new session token are
-left up to the reader.
+left up to you.
 
 Basic Tutorial
 --------------
