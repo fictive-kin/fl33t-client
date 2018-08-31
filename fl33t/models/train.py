@@ -14,6 +14,7 @@ from fl33t.models.mixins import (
 )
 
 
+# pylint: disable=no-member
 class Train(BaseModel, ManyFleetsMixin, ManyBuildsMixin):
     """
     The fl33t Train model

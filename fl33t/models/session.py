@@ -10,6 +10,7 @@ from fl33t.exceptions import InvalidSessionIdError
 from fl33t.models.base import BaseModel
 
 
+# pylint: disable=no-member
 class Session(BaseModel):
     """The fl33t Session model"""
 

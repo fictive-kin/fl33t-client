@@ -18,6 +18,7 @@ from fl33t.utils import ExtendedEncoder
 class BaseModel(ABC):
     """The base model from which all fl33t models should be extended"""
 
+    _defaults = {}
     _invalid_id = InvalidIdError
     _data = {}
     _booleans = []
@@ -30,31 +31,32 @@ class BaseModel(ABC):
         self._client = client
 
         self.logger = logging.getLogger(__name__)
-        for key in self._defaults.keys():
+        for key, default in self._defaults.items():
             if key not in kwargs:
-                self._data[key] = self._defaults[key]
+                setattr(self, key, default)
 
             else:
-                self._set_data(key, kwargs[key])
+                self._set_data(key, kwargs.pop(key))
+
+        # Just in case anything extra got sent
+        for key, value in kwargs.items():  # pylint: disable=unused-variable
+            raise AttributeError('{} is not a valid attribute of {}'.format(
+                key, self.__class__.__name__))
 
     def to_json(self):
         """Dumps this model as JSON for use in API calls"""
 
+        ret = {}
+
+        # pylint: disable=unused-variable
+        for key, default in self._defaults.items():
+            ret.update({key: getattr(self, key)})
+
         return json.dumps(
             {
-                self.__class__.__name__.lower(): self._data
+                self.__class__.__name__.lower(): ret
             },
             cls=ExtendedEncoder)
-
-    def __getattr__(self, key, default=None):
-        if key not in self._data:
-            if not default:
-                raise AttributeError(
-                    '{} is not a valid attribute of {}'.format(
-                        key, self.__class__.__name__))
-            return default
-
-        return self._data.get(key, default)
 
     def _set_data(self, key, value):
         """Sets a value within the model's allowed properties"""
@@ -63,24 +65,24 @@ class BaseModel(ABC):
             raise AttributeError('{} is not a valid attribute of {}'.format(
                 key, self.__class__.__name__))
         if not value:
-            self._data[key] = value
+            setattr(self, key, value)
 
         elif key in self._booleans:
-            self._data[key] = bool(value)
+            setattr(self, key, bool(value))
 
         elif key in self._ints:
-            self._data[key] = int(value)
+            setattr(self, key, int(value))
 
         elif key in self._timestamps:
             try:
                 if not value:
                     # If it evaluates to false, just use whatever
                     # was passed
-                    self._data[key] = value
+                    setattr(self, key, value)
                 elif isinstance(value, datetime.datetime):
-                    self._data[key] = value
+                    setattr(self, key, value)
                 else:
-                    self._data[key] = parser.parse(value)
+                    setattr(self, key, parser.parse(value))
             except Exception:
                 raise ValueError('{} MUST be an instance of'
                                  ' datetime.datetime or be machine'
@@ -90,10 +92,10 @@ class BaseModel(ABC):
             if value not in self._enums[key]:
                 raise ValueError('{} MUST be one of {}'.format(
                     key, self._enums[key]))
-            self._data[key] = value
+            setattr(self, key, value)
 
         else:
-            self._data[key] = value
+            setattr(self, key, value)
 
     @abstractmethod
     def id(self):  # pylint: disable=invalid-name

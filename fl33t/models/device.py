@@ -20,6 +20,7 @@ from fl33t.models.mixins import (
 )
 
 
+# pylint: disable=no-member
 class Device(BaseModel, OneBuildMixin, OneFleetMixin):
     """
     The fl33t Device model

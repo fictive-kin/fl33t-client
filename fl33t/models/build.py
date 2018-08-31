@@ -15,6 +15,7 @@ from fl33t.models.mixins import OneTrainMixin
 from fl33t.utils import md5
 
 
+# pylint: disable=no-member
 class Build(BaseModel, OneTrainMixin):
     """
     The fl33t Build model

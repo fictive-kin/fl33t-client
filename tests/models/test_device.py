@@ -119,23 +119,22 @@ def test_list(fl33t_client):
 def test_update(fl33t_client):
 
     device_id = "asdf"
-    train_id = "fdsa"
-    new_name = "My New Devices"
+    fleet_id = "fdsa"
+    new_name = "My New Device"
 
     update_response = {
         "device": {
             "build_id": None,
+            "checkin_tstamp": "2018-05-30T22:31:08.836406Z",
             "device_id": device_id,
+            "fleet_id": fleet_id,
             "name": new_name,
-            "size": 5,
-            "train_id": train_id,
-            "unreleased": True
+            "session_token": "poiuytrewq"
         }
     }
 
     get_response = copy.copy(update_response)
-    get_response['device']['name'] = "My Devices"
-    get_response['device']['unreleased'] = False
+    get_response['device']['name'] = "My Device"
 
     url = '/'.join((
         fl33t_client.base_team_url(),
@@ -149,13 +148,11 @@ def test_update(fl33t_client):
 
         obj = fl33t_client.get_device(device_id)
         obj.name = new_name
-        obj.unreleased = True
 
         response = obj.update()
 
         assert isinstance(response, Device)
         assert response.name == new_name
-        assert response.unreleased is True
 
 
 def test_upgrade_available(fl33t_client):

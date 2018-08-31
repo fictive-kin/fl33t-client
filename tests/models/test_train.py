@@ -102,9 +102,7 @@ def test_update(fl33t_client):
         "train": {
             "train_id": train_id,
             "name": new_name,
-            "upload_tstamp": "2018-05-30T22:31:08.836406Z",
-            "upload_url": None,
-            "version": "0.3"
+            "upload_tstamp": "2018-05-30T22:31:08.836406Z"
         }
     }
 

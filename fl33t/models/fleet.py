@@ -15,6 +15,7 @@ from fl33t.models.mixins import (
 )
 
 
+# pylint: disable=no-member
 class Fleet(BaseModel, OneTrainMixin, OneBuildMixin, ManyDevicesMixin):
     """The fl33t Fleet model"""
 
