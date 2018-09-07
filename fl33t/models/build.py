@@ -156,17 +156,22 @@ class Build(BaseModel, OneTrainMixin):
                 ' provided by fl33t for build: {}'.format(self.version))
             return self
 
+        # The Content-Disposition header is what sets the filename in fl33t
         headers = {
             'Content-Type': 'application/octet-stream',
             'Content-Disposition': 'attachment; filename="{}"'.format(
                 self.filename)
         }
         with open(self.fullpath, 'rb') as build_file:
+            # Must use requests directly as we do not want the normal fl33t
+            # API headers to be added to the upload request. The upload_url is
+            # a pre-signed URL and as such has all authentication built-in.
             response = requests.put(
                 self.upload_url,
                 data=build_file.read(),
                 headers=headers)
 
+            # Any non-200 status is an error with the upload.
             if not response or response.status_code != 200:
                 self.logger.exception(
                     'Failed to upload build file: {}'.format(self.version))
