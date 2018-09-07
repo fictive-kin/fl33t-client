@@ -30,7 +30,6 @@ from fl33t.models import (
     Session
 )
 
-LOGGER = logging.getLogger(__name__)
 API_HOST = 'https://api.fl33t.com'
 
 ENDPOINT_FAILED_MSG = 'The fl33t endpoint for {} returned an invalid response'
@@ -76,6 +75,8 @@ class Fl33tClient:  # pylint: disable=too-many-public-methods
                 self.default_query_limit = 25
         else:
             self.default_query_limit = 25
+
+        self.logger = logging.getLogger(__name__)
 
     def Build(self, **kwargs):  # pylint: disable=invalid-name
         """
@@ -265,26 +266,38 @@ class Fl33tClient:  # pylint: disable=too-many-public-methods
 
         params = kwargs.pop('params', None)
 
-        LOGGER.debug('Sending {} request with params: {}'.format(
+        self.logger.debug('Sending {} request with params: {}'.format(
             method, params))
-        LOGGER.debug('Sending {} request with payload: {}'.format(
+        self.logger.debug('Sending {} request with payload: {}'.format(
             method, data))
         method = getattr(requests, method.lower())
+
         try:
             result = method(url, params=params, data=data, **kwargs)
             result.raise_for_status()
+
         except requests.exceptions.HTTPError as exc:
-            LOGGER.exception(exc)
+            if not isinstance(result, requests.Response):
+                # The request failed in a way that we don't handle, give the
+                # user the raised exception directly.
+                raise
 
-        if result.status_code in [401, 403]:
-            raise UnprivilegedToken(url)
+            if result.status_code in [401, 403]:
+                raise UnprivilegedToken(url)
 
-        if result.status_code >= 500:
-            message = '{} returned a {} error: {}'.format(
-                url,
-                result.status_code,
-                result.text)
-            raise Fl33tApiException(message)
+            if result.status_code >= 500:
+                # Raise that something went wrong with the fl33t API request
+                message = '{} returned a {} error: {}'.format(
+                    url,
+                    result.status_code,
+                    result.text)
+                raise Fl33tApiException(message)
+
+            if result.status_code not in [400, 404, 409]:
+                # Log the exception if the request failed with a status code
+                # that we don't handle gracefully. 400/404 (InvalidIdError) and
+                # 409 (DuplicateIdError) are meant to be handled by the caller.
+                self.logger.exception(exc)
 
         return result
 
@@ -426,7 +439,7 @@ class Fl33tClient:  # pylint: disable=too-many-public-methods
 
         result = self.get(url)
 
-        if result.status_code == 400:
+        if result.status_code in [400, 404]:
             raise InvalidTrainIdError(train_id)
 
         if 'train' in result.json():
@@ -453,7 +466,7 @@ class Fl33tClient:  # pylint: disable=too-many-public-methods
 
         result = self.get(url)
 
-        if result.status_code == 400:
+        if result.status_code in [400, 404]:
             raise InvalidDeviceIdError(device_id)
 
         if 'device' in result.json():
