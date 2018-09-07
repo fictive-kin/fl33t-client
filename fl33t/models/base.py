@@ -153,7 +153,7 @@ class BaseModel(ABC):
             raise Fl33tClientException()
 
         result = self._client.put(self._self_url(), data=self)
-        if result.status_code in [400, 404]:
+        if result.status_code in (400, 404):
             raise self._invalid_id(self.id)
 
         if result.status_code != 204:
@@ -180,7 +180,7 @@ class BaseModel(ABC):
 
         result = self._client.delete(self._self_url())
 
-        if result.status_code in [400, 404]:
+        if result.status_code in (400, 404):
             raise self._invalid_id(self.id)
 
         if result.status_code != 204:

@@ -282,7 +282,7 @@ class Fl33tClient:  # pylint: disable=too-many-public-methods
                 # user the raised exception directly.
                 raise
 
-            if result.status_code in [401, 403]:
+            if result.status_code in (401, 403):
                 raise UnprivilegedToken(url)
 
             if result.status_code >= 500:
@@ -293,7 +293,7 @@ class Fl33tClient:  # pylint: disable=too-many-public-methods
                     result.text)
                 raise Fl33tApiException(message)
 
-            if result.status_code not in [400, 404, 409]:
+            if result.status_code not in (400, 404, 409):
                 # Log the exception if the request failed with a status code
                 # that we don't handle gracefully. 400/404 (InvalidIdError) and
                 # 409 (DuplicateIdError) are meant to be handled by the caller.
@@ -358,7 +358,7 @@ class Fl33tClient:  # pylint: disable=too-many-public-methods
             session_token)))
 
         result = self.get(url)
-        if result.status_code in [400, 404]:
+        if result.status_code in (400, 404):
             raise InvalidSessionIdError()
 
         if 'session' in result.json():
@@ -384,7 +384,7 @@ class Fl33tClient:  # pylint: disable=too-many-public-methods
 
         result = self.get(url)
 
-        if result.status_code in [400, 404]:
+        if result.status_code in (400, 404):
             raise InvalidFleetIdError(fleet_id)
 
         if 'fleet' in result.json():
@@ -412,7 +412,7 @@ class Fl33tClient:  # pylint: disable=too-many-public-methods
 
         result = self.get(url)
 
-        if result.status_code in [400, 404]:
+        if result.status_code in (400, 404):
             raise InvalidBuildIdError('train={}:{}'.format(train_id, build_id))
 
         if 'build' in result.json():
@@ -439,7 +439,7 @@ class Fl33tClient:  # pylint: disable=too-many-public-methods
 
         result = self.get(url)
 
-        if result.status_code in [400, 404]:
+        if result.status_code in (400, 404):
             raise InvalidTrainIdError(train_id)
 
         if 'train' in result.json():
@@ -466,7 +466,7 @@ class Fl33tClient:  # pylint: disable=too-many-public-methods
 
         result = self.get(url)
 
-        if result.status_code in [400, 404]:
+        if result.status_code in (400, 404):
             raise InvalidDeviceIdError(device_id)
 
         if 'device' in result.json():
