@@ -293,7 +293,9 @@ class Fl33tClient:  # pylint: disable=too-many-public-methods
         List API Sessions
 
         :param offset: If provided, the starting offset for result sets.
-            Defaults to 0
+            If not provided, will paginate through *all* records available,
+            effectively ignoring the `limit` parameter. To only retrieve the
+            first page of results, you must specifically set offset to `0`.
         :type offset: int or None
         :param limit: If provided, the number of records to return.
             Defaults to :py:attr:`default_query_limit`
@@ -306,14 +308,15 @@ class Fl33tClient:  # pylint: disable=too-many-public-methods
         url = "/".join((self.base_team_url(), 'sessions'))
         params = self._build_offset_limit(offset=offset, limit=limit)
 
-        result = self.get(url, params=params)
-
-        if 'sessions' not in result.json():
-            raise Fl33tApiException(ENDPOINT_FAILED_MSG.format(
-                'listing sessions'))
-
-        for item in result.json()['sessions']:
-            yield Session(client=self, **item)
+        single_page = False if offset is None else True
+        return self._paginator(
+            single_page,
+            url,
+            params,
+            'session',
+            Session,
+            'listing sessions'
+        )
 
     def get_own_session(self):
         """
@@ -507,7 +510,9 @@ class Fl33tClient:  # pylint: disable=too-many-public-methods
             belonging to the specified train ID
         :type train_id: str or None
         :param offset: If provided, the starting offset for result sets.
-            Defaults to 0
+            If not provided, will paginate through *all* records available,
+            effectively ignoring the `limit` parameter. To only retrieve the
+            first page of results, you must specifically set offset to `0`.
         :type offset: int or None
         :param limit: If provided, the number of records to return.
             Defaults to :py:attr:`default_query_limit`
@@ -524,20 +529,24 @@ class Fl33tClient:  # pylint: disable=too-many-public-methods
         if train_id:
             params['train_id'] = train_id
 
-        result = self.get(url, params=params)
-        if 'fleets' not in result.json():
-            raise Fl33tApiException(ENDPOINT_FAILED_MSG.format(
-                'listing fleets'))
-
-        for item in result.json()['fleets']:
-            yield Fleet(client=self, **item)
+        single_page = False if offset is None else True
+        return self._paginator(
+            single_page,
+            url,
+            params,
+            'fleet',
+            Fleet,
+            'listing fleets'
+        )
 
     def list_trains(self, offset=None, limit=None):
         """
         Get all trains from fl33t.
 
         :param offset: If provided, the starting offset for result sets.
-            Defaults to 0
+            If not provided, will paginate through *all* records available,
+            effectively ignoring the `limit` parameter. To only retrieve the
+            first page of results, you must specifically set offset to `0`.
         :type offset: int or None
         :param limit: If provided, the number of records to return.
             Defaults to :py:attr:`default_query_limit`
@@ -551,13 +560,15 @@ class Fl33tClient:  # pylint: disable=too-many-public-methods
         url = "/".join((self.base_team_url(), 'trains'))
         params = self._build_offset_limit(offset=offset, limit=limit)
 
-        result = self.get(url, params=params)
-        if 'trains' not in result.json():
-            raise Fl33tApiException(ENDPOINT_FAILED_MSG.format(
-                'listing trains'))
-
-        for item in result.json()['trains']:
-            yield Train(client=self, **item)
+        single_page = False if offset is None else True
+        return self._paginator(
+            single_page,
+            url,
+            params,
+            'train',
+            Train,
+            'listing trains'
+        )
 
     def list_devices(self, fleet_id=None, offset=None, limit=None):
         """
@@ -567,7 +578,9 @@ class Fl33tClient:  # pylint: disable=too-many-public-methods
             specified fleet
         :type fleet_id: str or None
         :param offset: If provided, the starting offset for result sets.
-            Defaults to 0
+            If not provided, will paginate through *all* records available,
+            effectively ignoring the `limit` parameter. To only retrieve the
+            first page of results, you must specifically set offset to `0`.
         :type offset: int or None
         :param limit: If provided, the number of records to return.
             Defaults to :py:attr:`default_query_limit`
@@ -583,13 +596,15 @@ class Fl33tClient:  # pylint: disable=too-many-public-methods
         if fleet_id:
             params['fleet_id'] = fleet_id
 
-        result = self.get(url, params=params)
-        if 'devices' not in result.json():
-            raise Fl33tApiException(ENDPOINT_FAILED_MSG.format(
-                'listing devices'))
-
-        for item in result.json()['devices']:
-            yield Device(client=self, **item)
+        single_page = False if offset is None else True
+        return self._paginator(
+            single_page,
+            url,
+            params,
+            'device',
+            Device,
+            'listing devices'
+        )
 
     def list_builds(self, train_id, version=None, offset=None, limit=None):
         """
@@ -597,7 +612,9 @@ class Fl33tClient:  # pylint: disable=too-many-public-methods
 
         :param int train_id: The train_id that the builds are part of
         :param offset: If provided, the starting offset for result sets.
-            Defaults to 0
+            If not provided, will paginate through *all* records available,
+            effectively ignoring the `limit` parameter. To only retrieve the
+            first page of results, you must specifically set offset to `0`.
         :type offset: int or None
         :param limit: If provided, the number of records to return.
             Defaults to :py:attr:`default_query_limit`
@@ -614,10 +631,73 @@ class Fl33tClient:  # pylint: disable=too-many-public-methods
         if version:
             params['version'] = version
 
-        result = self.get(url, params=params)
-        if 'builds' not in result.json():
-            raise Fl33tApiException(ENDPOINT_FAILED_MSG.format(
-                'listing builds for train {}'.format(train_id)))
+        single_page = False if offset is None else True
+        return self._paginator(
+            single_page,
+            url,
+            params,
+            'build',
+            Build,
+            'listing builds for train {}'.format(train_id)
+        )
 
-        for item in result.json()['builds']:
-            yield Build(client=self, **item)
+    def _paginator(self,
+                   single_page,
+                   url,
+                   params,
+                   model_name,
+                   model,
+                   error_msg):
+
+        """
+        Paginate through a specific listing endpoint.
+
+        :param bool single_page: If we should be doing pagination, or simply
+            returning the single page of results.
+        :param str url: The URL to use for the page retrieval
+        :param dict params: A :py:`dict` of parameteres to send with the
+            request
+        :param str model_name: The name of the model that will be used to
+            return data
+        :param model: The actual class to be used to return data
+        :type model: Any subclass of :py:class:`fl33t.models.Base`
+        :param str error_msg: The error message to return in the case of an
+            API communication exception
+        :yields: generator of the provided `model` type
+        :raises UnprivilegedToken: if the session token does not have enough
+            privilege to perform this action
+        :raises Fl33tApiException: if there was a 5xx error returned by fl33t
+        """
+
+        total_count = None
+
+        plural_model = '{}s'.format(model_name)
+
+        while True:
+            result = self.get(url, params=params)
+            data = result.json()
+            if plural_model not in data:
+                raise Fl33tApiException(ENDPOINT_FAILED_MSG.format(error_msg))
+
+            record_count = 0
+
+            for item in data[plural_model]:
+                record_count += 1
+                yield model(client=self, **item)
+
+            if single_page:
+                break
+
+            total_returned = params['offset'] + record_count
+
+            if total_count is None:
+                if '{}_count'.format(model_name) in data:
+                    total_count = data['{}_count'.format(model_name)]
+                else:
+                    total_count = 0
+
+            if total_count > total_returned:
+                params['offset'] = params['offset'] + params['limit']
+
+            else:
+                break
