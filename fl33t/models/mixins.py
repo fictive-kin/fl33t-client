@@ -7,16 +7,20 @@ Reusable pieces for fl33t models
 
 class ManyDevicesMixin:  # pylint: disable=too-few-public-methods
     """For models with child devices"""
-    def devices(self):
+    def devices(self, offset=None, limit=None):
         """Return the child devices"""
-        return self._client.list_devices(fleet_id=self.fleet_id)
+        return self._client.list_devices(fleet_id=self.fleet_id,
+                                         offset=offset,
+                                         limit=limit)
 
 
 class ManyBuildsMixin:  # pylint: disable=too-few-public-methods
     """For models with child builds"""
-    def builds(self):
+    def builds(self, offset=None, limit=None):
         """Return the child builds"""
-        return self._client.list_builds(train_id=self.train_id)
+        return self._client.list_builds(train_id=self.train_id,
+                                        offset=offset,
+                                        limit=limit)
 
 
 class OneBuildMixin:  # pylint: disable=too-few-public-methods
@@ -35,9 +39,11 @@ class OneTrainMixin:  # pylint: disable=too-few-public-methods
 
 class ManyFleetsMixin:  # pylint: disable=too-few-public-methods
     """For models with child fleets"""
-    def fleets(self):
+    def fleets(self, offset=None, limit=None):
         """Return the child fleets"""
-        return self._client.list_fleets(train_id=self.train_id)
+        return self._client.list_fleets(train_id=self.train_id,
+                                        offset=offset,
+                                        limit=limit)
 
 
 class OneFleetMixin:  # pylint: disable=too-few-public-methods
