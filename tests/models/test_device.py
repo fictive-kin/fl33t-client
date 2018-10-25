@@ -138,7 +138,11 @@ def test_update(fl33t_client, device_id, fleet_id, device_get_response):
         assert response.name == new_name
 
 
-def test_upgrade_available(fl33t_client, device_id, fleet_id, train_id, device_get_response):
+def test_upgrade_available(fl33t_client,
+                           device_id,
+                           fleet_id,
+                           train_id,
+                           device_get_response):
 
     upgrade_response = {
         "build": {
@@ -176,7 +180,10 @@ def test_upgrade_available(fl33t_client, device_id, fleet_id, train_id, device_g
         assert build.train_id == train_id
 
 
-def test_upgrade_not_available(fl33t_client, device_id, fleet_id, device_get_response):
+def test_upgrade_not_available(fl33t_client,
+                               device_id,
+                               fleet_id,
+                               device_get_response):
 
     url = '/'.join((
         fl33t_client.base_team_url,
@@ -211,10 +218,14 @@ def test_fail_duplicate_id(fl33t_client, device_id):
         mock.post(url, status_code=409)
 
         with pytest.raises(DuplicateDeviceIdError):
-             device.create()
+            device.create()
 
 
-def test_parent_fleet(fl33t_client, device_id, fleet_id, device_get_response, fleet_get_response):
+def test_parent_fleet(fl33t_client,
+                      device_id,
+                      fleet_id,
+                      device_get_response,
+                      fleet_get_response):
 
     url = '/'.join((
         fl33t_client.base_team_url,
@@ -238,7 +249,14 @@ def test_parent_fleet(fl33t_client, device_id, fleet_id, device_get_response, fl
         assert obj.fleet.fleet_id == fleet_id
 
 
-def test_parent_build(fl33t_client, device_id, fleet_id, train_id, build_id, device_get_response, fleet_get_response, build_get_response):
+def test_parent_build(fl33t_client,
+                      device_id,
+                      fleet_id,
+                      train_id,
+                      build_id,
+                      device_get_response,
+                      fleet_get_response,
+                      build_get_response):
 
     url = '/'.join((
         fl33t_client.base_team_url,

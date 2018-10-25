@@ -63,5 +63,5 @@ def test_fail_get_build_invalid_id(fl33t_client):
         ])
 
         with pytest.raises(InvalidBuildIdError):
-            obj = fl33t_client.get_build(train_id, build_id)
-            obj = fl33t_client.get_build(train_id, build_id)
+            fl33t_client.get_build(train_id, build_id)
+            fl33t_client.get_build(train_id, build_id)

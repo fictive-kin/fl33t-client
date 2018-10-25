@@ -121,7 +121,11 @@ def test_update(fl33t_client, fleet_id, train_id, fleet_get_response):
         assert response.unreleased is True
 
 
-def test_parent_train(fl33t_client, fleet_id, train_id, fleet_get_response, train_get_response):
+def test_parent_train(fl33t_client,
+                      fleet_id,
+                      train_id,
+                      fleet_get_response,
+                      train_get_response):
 
     url = '/'.join((
         fl33t_client.base_team_url,
@@ -145,7 +149,12 @@ def test_parent_train(fl33t_client, fleet_id, train_id, fleet_get_response, trai
         assert obj.train.train_id == train_id
 
 
-def test_parent_build(fl33t_client, fleet_id, train_id, build_id, fleet_get_response, build_get_response):
+def test_parent_build(fl33t_client,
+                      fleet_id,
+                      train_id,
+                      build_id,
+                      fleet_get_response,
+                      build_get_response):
 
     url = '/'.join((
         fl33t_client.base_team_url,

@@ -49,5 +49,5 @@ def test_fail_get_train_invalid_id(fl33t_client):
         ])
 
         with pytest.raises(InvalidTrainIdError):
-            obj = fl33t_client.get_train(train_id)
-            obj = fl33t_client.get_train(train_id)
+            fl33t_client.get_train(train_id)
+            fl33t_client.get_train(train_id)

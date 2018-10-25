@@ -52,5 +52,5 @@ def test_fail_get_session_invalid_id(fl33t_client):
         ])
 
         with pytest.raises(InvalidSessionIdError):
-            obj = fl33t_client.get_session(session_token)
-            obj = fl33t_client.get_session(session_token)
+            fl33t_client.get_session(session_token)
+            fl33t_client.get_session(session_token)

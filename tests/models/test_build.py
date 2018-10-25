@@ -147,7 +147,10 @@ def test_update(fl33t_client, train_id, build_id, build_get_response):
         assert response.released is True
 
 
-def test_parent_train(fl33t_client, train_id, build_get_response, train_get_response):
+def test_parent_train(fl33t_client,
+                      train_id,
+                      build_get_response,
+                      train_get_response):
 
     url = '/'.join((
         fl33t_client.base_team_url,

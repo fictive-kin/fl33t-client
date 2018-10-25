@@ -53,5 +53,5 @@ def test_fail_get_fleet_invalid_id(fl33t_client):
         ])
 
         with pytest.raises(InvalidFleetIdError):
-            obj = fl33t_client.get_fleet(fleet_id)
-            obj = fl33t_client.get_fleet(fleet_id)
+            fl33t_client.get_fleet(fleet_id)
+            fl33t_client.get_fleet(fleet_id)
