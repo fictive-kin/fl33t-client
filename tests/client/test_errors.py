@@ -15,7 +15,7 @@ def test_fail_unprivileged(fl33t_client):
     session_token = 'asdffdsa'
 
     url = '/'.join((
-        fl33t_client.base_team_url(),
+        fl33t_client.base_team_url,
         'session',
         session_token
     ))
@@ -35,7 +35,7 @@ def test_fl33t_api_failure(fl33t_client):
     session_token = 'asdffdsa'
 
     url = '/'.join((
-        fl33t_client.base_team_url(),
+        fl33t_client.base_team_url,
         'session',
         session_token
     ))

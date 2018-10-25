@@ -19,7 +19,7 @@ def test_get_train(fl33t_client):
     }
 
     url = '/'.join((
-        fl33t_client.base_team_url(),
+        fl33t_client.base_team_url,
         'train',
         train_id
     ))
@@ -37,7 +37,7 @@ def test_fail_get_train_invalid_id(fl33t_client):
     train_id = 'asdf'
 
     url = '/'.join((
-        fl33t_client.base_team_url(),
+        fl33t_client.base_team_url,
         'train',
         train_id
     ))

@@ -20,7 +20,7 @@ def test_create(fl33t_client):
     }
 
     url = '/'.join((
-        fl33t_client.base_team_url(),
+        fl33t_client.base_team_url,
         'train'
     ))
 
@@ -47,7 +47,7 @@ def test_delete(fl33t_client):
     }
 
     url = '/'.join((
-        fl33t_client.base_team_url(),
+        fl33t_client.base_team_url,
         'train',
         train_id
     ))
@@ -78,7 +78,7 @@ def test_list(fl33t_client):
     }
 
     url = '/'.join((
-        fl33t_client.base_team_url(),
+        fl33t_client.base_team_url,
         'trains'
     ))
 
@@ -110,7 +110,7 @@ def test_update(fl33t_client):
     get_response['train']['name'] = "My Train's Old Name"
 
     url = '/'.join((
-        fl33t_client.base_team_url(),
+        fl33t_client.base_team_url,
         'train',
         train_id
     ))
