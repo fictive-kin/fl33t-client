@@ -80,6 +80,7 @@ class Build(BaseModel, OneTrainMixin):
             self.upload_tstamp
             )
 
+    @property
     def id(self):
         """
         Get this build's unique ID
@@ -92,27 +93,29 @@ class Build(BaseModel, OneTrainMixin):
             self.build_id
         )
 
-    def _self_url(self):
+    @property
+    def self_url(self):
         """
-        The full URL for this build in fl33t
+        The full URL for this particular build in fl33t
 
         :returns: str
         """
 
         return '/'.join((
-            self._base_url(),
+            self.base_url,
             self.build_id
         ))
 
-    def _base_url(self):
+    @property
+    def base_url(self):
         """
-        Get the base URL for build actions
+        The base URL for build actions
 
         :returns: str
         """
 
         return '/'.join((
-            self._client.base_team_url(),
+            self._client.base_team_url,
             'train/{}/build'.format(
                 self.train_id
             )
@@ -133,9 +136,7 @@ class Build(BaseModel, OneTrainMixin):
         if not self._client:
             raise Fl33tClientException()
 
-        url = self._base_url()
-
-        result = self._client.post(url, data=self)
+        result = self._client.post(self.base_url, data=self)
         if 'build' not in result.json():
             self.logger.exception(
                 'Could not create build for: {}'.format(self.version))

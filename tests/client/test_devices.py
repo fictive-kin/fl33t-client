@@ -23,7 +23,7 @@ def test_get_device(fl33t_client):
     }
 
     url = '/'.join((
-        fl33t_client.base_team_url(),
+        fl33t_client.base_team_url,
         'device',
         device_id
     ))
@@ -41,7 +41,7 @@ def test_fail_get_device_invalid_id(fl33t_client):
     device_id = 'asdffdsa'
 
     url = '/'.join((
-        fl33t_client.base_team_url(),
+        fl33t_client.base_team_url,
         'device',
         device_id
     ))
@@ -53,5 +53,5 @@ def test_fail_get_device_invalid_id(fl33t_client):
         ])
 
         with pytest.raises(InvalidDeviceIdError):
-            obj = fl33t_client.get_device(device_id)
-            obj = fl33t_client.get_device(device_id)
+            fl33t_client.get_device(device_id)
+            fl33t_client.get_device(device_id)

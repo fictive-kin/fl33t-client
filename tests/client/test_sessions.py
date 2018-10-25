@@ -21,7 +21,7 @@ def test_own_session(fl33t_client):
     }
 
     url = '/'.join((
-        fl33t_client.base_team_url(),
+        fl33t_client.base_team_url,
         'session',
         fl33t_client.token
     ))
@@ -33,14 +33,14 @@ def test_own_session(fl33t_client):
 
         assert isinstance(obj, Session)
         assert obj.session_token == fl33t_client.token
-        assert obj.priv() == 'upload'
+        assert obj.priv == 'upload'
 
 
 def test_fail_get_session_invalid_id(fl33t_client):
     session_token = 'asdffdsa'
 
     url = '/'.join((
-        fl33t_client.base_team_url(),
+        fl33t_client.base_team_url,
         'session',
         session_token
     ))
@@ -52,5 +52,5 @@ def test_fail_get_session_invalid_id(fl33t_client):
         ])
 
         with pytest.raises(InvalidSessionIdError):
-            obj = fl33t_client.get_session(session_token)
-            obj = fl33t_client.get_session(session_token)
+            fl33t_client.get_session(session_token)
+            fl33t_client.get_session(session_token)

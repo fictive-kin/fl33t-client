@@ -27,8 +27,13 @@ class Session(BaseModel):
         'upload': False
     }
 
+    @property
     def priv(self):
-        """Return a human-readable privilege"""
+        """
+        Return a human-readable privilege
+
+        :returns: str
+        """
         if self.admin:
             return 'admin'
         if self.device:
@@ -44,17 +49,18 @@ class Session(BaseModel):
     def __str__(self):
         return '{}:{}:{}'.format(
             self.type,
-            self.priv(),
+            self.priv,
             self.session_token
         )
 
     def __repr__(self):
         return '<Session type={} priv={} token={}>'.format(
             self.type,
-            self.priv(),
+            self.priv,
             self.session_token
         )
 
+    @property
     def id(self):
         """
         Get this session's unique ID
@@ -64,11 +70,12 @@ class Session(BaseModel):
 
         return self.session_token
 
-    def _self_url(self):
+    @property
+    def self_url(self):
         """
-        The full URL for this session in fl33t
+        The full URL for this particular session in fl33t
 
         :returns: str
         """
 
-        return '/'.join((self._base_url(), self.session_token))
+        return '/'.join((self.base_url, self.session_token))

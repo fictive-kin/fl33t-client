@@ -133,9 +133,10 @@ class Fl33tClient:  # pylint: disable=too-many-public-methods
         """
         return Session(client=self, **kwargs)
 
+    @property
     def base_team_url(self):
         """
-        Get the base team URL for this client
+        The base team URL for this fl33t client
 
         :returns: str
         """
@@ -318,7 +319,7 @@ class Fl33tClient:  # pylint: disable=too-many-public-methods
             privilege to perform this action
         :raises Fl33tApiException: if there was a 5xx error returned by fl33t
         """
-        url = "/".join((self.base_team_url(), 'sessions'))
+        url = "/".join((self.base_team_url, 'sessions'))
         params = self._build_offset_limit(offset=offset, limit=limit)
 
         single_page = False if offset is None else True
@@ -357,7 +358,7 @@ class Fl33tClient:  # pylint: disable=too-many-public-methods
         :raises Fl33tApiException: if there was a 5xx error returned by fl33t
         """
 
-        url = "/".join((self.base_team_url(), 'session/{}'.format(
+        url = "/".join((self.base_team_url, 'session/{}'.format(
             session_token)))
 
         result = self.get(url)
@@ -383,7 +384,7 @@ class Fl33tClient:  # pylint: disable=too-many-public-methods
         :raises Fl33tApiException: if there was a 5xx error returned by fl33t
         """
 
-        url = "/".join((self.base_team_url(), 'fleet/{}'.format(fleet_id)))
+        url = "/".join((self.base_team_url, 'fleet/{}'.format(fleet_id)))
 
         result = self.get(url)
 
@@ -410,7 +411,7 @@ class Fl33tClient:  # pylint: disable=too-many-public-methods
         :raises Fl33tApiException: if there was a 5xx error returned by fl33t
         """
 
-        url = "/".join((self.base_team_url(), 'train/{}/build/{}'.format(
+        url = "/".join((self.base_team_url, 'train/{}/build/{}'.format(
             train_id, build_id)))
 
         result = self.get(url)
@@ -437,7 +438,7 @@ class Fl33tClient:  # pylint: disable=too-many-public-methods
         :raises Fl33tApiException: if there was a 5xx error returned by fl33t
         """
 
-        url = "/".join((self.base_team_url(), 'train/{}'.format(
+        url = "/".join((self.base_team_url, 'train/{}'.format(
             train_id)))
 
         result = self.get(url)
@@ -464,7 +465,7 @@ class Fl33tClient:  # pylint: disable=too-many-public-methods
         :raises Fl33tApiException: if there was a 5xx error returned by fl33t
         """
 
-        url = "/".join((self.base_team_url(), 'device/{}'.format(
+        url = "/".join((self.base_team_url, 'device/{}'.format(
             device_id)))
 
         result = self.get(url)
@@ -493,7 +494,7 @@ class Fl33tClient:  # pylint: disable=too-many-public-methods
         :raises Fl33tApiException: if there was a 5xx error returned by fl33t
         """
 
-        url = '/'.join((self.base_team_url(), 'device/{}/build'.format(
+        url = '/'.join((self.base_team_url, 'device/{}/build'.format(
             device_id)))
 
         params = None
@@ -536,7 +537,7 @@ class Fl33tClient:  # pylint: disable=too-many-public-methods
         :raises Fl33tApiException: if there was a 5xx error returned by fl33t
         """
 
-        url = "/".join((self.base_team_url(), 'fleets'))
+        url = "/".join((self.base_team_url, 'fleets'))
         params = self._build_offset_limit(offset=offset, limit=limit)
 
         if train_id:
@@ -570,7 +571,7 @@ class Fl33tClient:  # pylint: disable=too-many-public-methods
         :raises Fl33tApiException: if there was a 5xx error returned by fl33t
         """
 
-        url = "/".join((self.base_team_url(), 'trains'))
+        url = "/".join((self.base_team_url, 'trains'))
         params = self._build_offset_limit(offset=offset, limit=limit)
 
         single_page = False if offset is None else True
@@ -604,7 +605,7 @@ class Fl33tClient:  # pylint: disable=too-many-public-methods
         :raises Fl33tApiException: if there was a 5xx error returned by fl33t
         """
 
-        url = "/".join((self.base_team_url(), 'devices'))
+        url = "/".join((self.base_team_url, 'devices'))
         params = self._build_offset_limit(offset=offset, limit=limit)
         if fleet_id:
             params['fleet_id'] = fleet_id
@@ -638,7 +639,7 @@ class Fl33tClient:  # pylint: disable=too-many-public-methods
         :raises Fl33tApiException: if there was a 5xx error returned by fl33t
         """
 
-        url = "/".join((self.base_team_url(), 'train/{}/builds'.format(
+        url = "/".join((self.base_team_url, 'train/{}/builds'.format(
             train_id)))
         params = self._build_offset_limit(offset=offset, limit=limit)
         if version:

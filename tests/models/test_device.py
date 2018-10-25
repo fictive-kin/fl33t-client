@@ -6,12 +6,10 @@ import pytest
 import requests_mock
 
 from fl33t.exceptions import DuplicateDeviceIdError
-from fl33t.models import Device, Build
+from fl33t.models import Device, Build, Fleet
 
 
-def test_create(fl33t_client):
-    device_id = 'asdf'
-    fleet_id = 'fdsa'
+def test_create(fl33t_client, device_id, fleet_id):
     name = 'My Device'
     session_token = 'poiuytrewq'
 
@@ -30,7 +28,7 @@ def test_create(fl33t_client):
             fl33t_client.base_uri, fl33t_client.team_id)
 
     url = '/'.join((
-        fl33t_client.base_team_url(),
+        fl33t_client.base_team_url,
         'device',
     ))
 
@@ -48,29 +46,16 @@ def test_create(fl33t_client):
         assert response.session_token == session_token
 
 
-def test_delete(fl33t_client):
-    device_id = 'asdf'
-    fleet_id = 'fdsa'
-
-    get_response = {
-        "device": {
-            "build_id": None,
-            "checkin_tstamp": "2018-03-31T22:31:08.836406Z",
-            "device_id": device_id,
-            "name": "My Device",
-            "fleet_id": fleet_id,
-            "session_token": "poiuytrewq"
-        }
-    }
+def test_delete(fl33t_client, device_id, fleet_id, device_get_response):
 
     url = '/'.join((
-        fl33t_client.base_team_url(),
+        fl33t_client.base_team_url,
         'device',
         device_id
     ))
 
     with requests_mock.Mocker() as mock:
-        mock.get(url, text=json.dumps(get_response))
+        mock.get(url, text=json.dumps(device_get_response))
         mock.delete(url, [{'status_code': 204}])
 
         obj = fl33t_client.get_device(device_id)
@@ -101,7 +86,7 @@ def test_list(fl33t_client):
     }
 
     url = '/'.join((
-        fl33t_client.base_team_url(),
+        fl33t_client.base_team_url,
         'devices'
     ))
 
@@ -116,10 +101,8 @@ def test_list(fl33t_client):
         assert len(objs) == 2
 
 
-def test_update(fl33t_client):
+def test_update(fl33t_client, device_id, fleet_id, device_get_response):
 
-    device_id = "asdf"
-    fleet_id = "fdsa"
     new_name = "My New Device"
 
     update_response = {
@@ -133,17 +116,17 @@ def test_update(fl33t_client):
         }
     }
 
-    get_response = copy.copy(update_response)
-    get_response['device']['name'] = "My Device"
+    update_response = copy.copy(device_get_response)
+    update_response['device']['name'] = new_name
 
     url = '/'.join((
-        fl33t_client.base_team_url(),
+        fl33t_client.base_team_url,
         'device',
         device_id
     ))
 
     with requests_mock.Mocker() as mock:
-        mock.get(url, text=json.dumps(get_response))
+        mock.get(url, text=json.dumps(device_get_response))
         mock.put(url, text=json.dumps(update_response), status_code=204)
 
         obj = fl33t_client.get_device(device_id)
@@ -155,21 +138,11 @@ def test_update(fl33t_client):
         assert response.name == new_name
 
 
-def test_upgrade_available(fl33t_client):
-    device_id = 'asdf'
-    fleet_id = 'fdsa'
-    train_id = 'zxcv'
-
-    get_response = {
-        "device": {
-            "build_id": None,
-            "checkin_tstamp": "2018-03-31T22:31:08.836406Z",
-            "device_id": device_id,
-            "name": "My Device",
-            "fleet_id": fleet_id,
-            "session_token": "poiuytrewq"
-        }
-    }
+def test_upgrade_available(fl33t_client,
+                           device_id,
+                           fleet_id,
+                           train_id,
+                           device_get_response):
 
     upgrade_response = {
         "build": {
@@ -188,7 +161,7 @@ def test_upgrade_available(fl33t_client):
     }
 
     url = '/'.join((
-        fl33t_client.base_team_url(),
+        fl33t_client.base_team_url,
         'device',
         device_id
     ))
@@ -196,7 +169,7 @@ def test_upgrade_available(fl33t_client):
     build_url = '/'.join((url, 'build'))
 
     with requests_mock.Mocker() as mock:
-        mock.get(url, text=json.dumps(get_response))
+        mock.get(url, text=json.dumps(device_get_response))
         mock.get(build_url, text=json.dumps(upgrade_response))
 
         obj = fl33t_client.get_device(device_id)
@@ -207,24 +180,13 @@ def test_upgrade_available(fl33t_client):
         assert build.train_id == train_id
 
 
-def test_upgrade_not_available(fl33t_client):
-    device_id = 'asdf'
-    fleet_id = 'fdsa'
-    train_id = 'zxcv'
-
-    get_response = {
-        "device": {
-            "build_id": None,
-            "checkin_tstamp": "2018-03-31T22:31:08.836406Z",
-            "device_id": device_id,
-            "name": "My Device",
-            "fleet_id": fleet_id,
-            "session_token": "poiuytrewq"
-        }
-    }
+def test_upgrade_not_available(fl33t_client,
+                               device_id,
+                               fleet_id,
+                               device_get_response):
 
     url = '/'.join((
-        fl33t_client.base_team_url(),
+        fl33t_client.base_team_url,
         'device',
         device_id
     ))
@@ -232,7 +194,7 @@ def test_upgrade_not_available(fl33t_client):
     build_url = '/'.join((url, 'build'))
 
     with requests_mock.Mocker() as mock:
-        mock.get(url, text=json.dumps(get_response))
+        mock.get(url, text=json.dumps(device_get_response))
         mock.get(build_url, status_code=204)
 
         obj = fl33t_client.get_device(device_id)
@@ -243,13 +205,12 @@ def test_upgrade_not_available(fl33t_client):
         assert build is False
 
 
-def test_fail_duplicate_id(fl33t_client):
-    device_id = 'asdf'
+def test_fail_duplicate_id(fl33t_client, device_id):
 
     device = fl33t_client.Device(device_id=device_id)
 
     url = '/'.join((
-        fl33t_client.base_team_url(),
+        fl33t_client.base_team_url,
         'device'
     ))
 
@@ -257,4 +218,72 @@ def test_fail_duplicate_id(fl33t_client):
         mock.post(url, status_code=409)
 
         with pytest.raises(DuplicateDeviceIdError):
-             device.create()
+            device.create()
+
+
+def test_parent_fleet(fl33t_client,
+                      device_id,
+                      fleet_id,
+                      device_get_response,
+                      fleet_get_response):
+
+    url = '/'.join((
+        fl33t_client.base_team_url,
+        'device',
+        device_id
+    ))
+
+    fleet_url = '/'.join((
+        fl33t_client.base_team_url,
+        'fleet',
+        fleet_id
+    ))
+
+    with requests_mock.Mocker() as mock:
+        mock.get(url, text=json.dumps(device_get_response))
+        mock.get(fleet_url, text=json.dumps(fleet_get_response))
+
+        obj = fl33t_client.get_device(device_id)
+
+        assert isinstance(obj.fleet, Fleet)
+        assert obj.fleet.fleet_id == fleet_id
+
+
+def test_parent_build(fl33t_client,
+                      device_id,
+                      fleet_id,
+                      train_id,
+                      build_id,
+                      device_get_response,
+                      fleet_get_response,
+                      build_get_response):
+
+    url = '/'.join((
+        fl33t_client.base_team_url,
+        'device',
+        device_id
+    ))
+
+    fleet_url = '/'.join((
+        fl33t_client.base_team_url,
+        'fleet',
+        fleet_id
+    ))
+
+    build_url = '/'.join((
+        fl33t_client.base_team_url,
+        'train',
+        train_id,
+        'build',
+        build_id
+    ))
+
+    with requests_mock.Mocker() as mock:
+        mock.get(url, text=json.dumps(device_get_response))
+        mock.get(fleet_url, text=json.dumps(fleet_get_response))
+        mock.get(build_url, text=json.dumps(build_get_response))
+
+        obj = fl33t_client.get_device(device_id)
+
+        assert isinstance(obj.fleet.build, Build)
+        assert obj.fleet.build.build_id == build_id

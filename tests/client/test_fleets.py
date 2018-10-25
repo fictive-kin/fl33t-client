@@ -23,7 +23,7 @@ def test_get_fleet(fl33t_client):
     }
 
     url = '/'.join((
-        fl33t_client.base_team_url(),
+        fl33t_client.base_team_url,
         'fleet',
         fleet_id
     ))
@@ -41,7 +41,7 @@ def test_fail_get_fleet_invalid_id(fl33t_client):
     fleet_id = 'fdsa'
 
     url = '/'.join((
-        fl33t_client.base_team_url(),
+        fl33t_client.base_team_url,
         'fleet',
         fleet_id
     ))
@@ -53,5 +53,5 @@ def test_fail_get_fleet_invalid_id(fl33t_client):
         ])
 
         with pytest.raises(InvalidFleetIdError):
-            obj = fl33t_client.get_fleet(fleet_id)
-            obj = fl33t_client.get_fleet(fleet_id)
+            fl33t_client.get_fleet(fleet_id)
+            fl33t_client.get_fleet(fleet_id)

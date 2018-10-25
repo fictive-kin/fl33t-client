@@ -47,6 +47,7 @@ class Device(BaseModel, OneBuildMixin, OneFleetMixin):
                               'to generate and ID'))
         super().__init__(client=client, **kwargs)
 
+    @property
     def id(self):
         """
         Get this Device's unique ID
@@ -101,15 +102,16 @@ class Device(BaseModel, OneBuildMixin, OneFleetMixin):
                     )
                 )
 
-    def _self_url(self):
+    @property
+    def self_url(self):
         """
-        The full URL for this object in fl33t
+        The full URL for this particular device in fl33t
 
         :returns: str
         """
 
         return '/'.join((
-            self._base_url(),
+            self.base_url,
             self.device_id
         ))
 
@@ -129,9 +131,7 @@ class Device(BaseModel, OneBuildMixin, OneFleetMixin):
         if not self._client:
             raise Fl33tClientException()
 
-        url = self._base_url()
-
-        result = self._client.post(url, data=self)
+        result = self._client.post(self.base_url, data=self)
         if result.status_code == 409:
             raise DuplicateDeviceIdError(self.device_id)
 

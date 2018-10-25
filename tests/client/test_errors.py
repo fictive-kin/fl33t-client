@@ -1,5 +1,4 @@
 
-import json
 import pytest
 import requests_mock
 
@@ -15,7 +14,7 @@ def test_fail_unprivileged(fl33t_client):
     session_token = 'asdffdsa'
 
     url = '/'.join((
-        fl33t_client.base_team_url(),
+        fl33t_client.base_team_url,
         'session',
         session_token
     ))
@@ -27,15 +26,15 @@ def test_fail_unprivileged(fl33t_client):
         ])
 
         with pytest.raises(UnprivilegedToken):
-            obj = fl33t_client.get_session(session_token)
-            obj = fl33t_client.get_session(session_token)
+            fl33t_client.get_session(session_token)
+            fl33t_client.get_session(session_token)
 
 
 def test_fl33t_api_failure(fl33t_client):
     session_token = 'asdffdsa'
 
     url = '/'.join((
-        fl33t_client.base_team_url(),
+        fl33t_client.base_team_url,
         'session',
         session_token
     ))
@@ -47,8 +46,8 @@ def test_fl33t_api_failure(fl33t_client):
         ])
 
         with pytest.raises(Fl33tApiException):
-            obj = fl33t_client.get_session(session_token)
-            obj = fl33t_client.get_session(session_token)
+            fl33t_client.get_session(session_token)
+            fl33t_client.get_session(session_token)
 
 
 def test_fl33t_client_exc():
