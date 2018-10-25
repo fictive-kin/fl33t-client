@@ -53,6 +53,7 @@ class Fleet(BaseModel, OneTrainMixin, OneBuildMixin, ManyDevicesMixin):
                     )
                 )
 
+    @property
     def id(self):
         """
         Get this fleet's unique ID
@@ -62,11 +63,12 @@ class Fleet(BaseModel, OneTrainMixin, OneBuildMixin, ManyDevicesMixin):
 
         return self.fleet_id
 
-    def _self_url(self):
+    @property
+    def self_url(self):
         """
         The full URL for this fleet in fl33t
 
         :returns: str
         """
 
-        return '/'.join((self._base_url(), self.fleet_id))
+        return '/'.join((self.base_url, self.fleet_id))

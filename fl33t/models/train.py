@@ -40,6 +40,7 @@ class Train(BaseModel, ManyFleetsMixin, ManyBuildsMixin):
             self.upload_tstamp
         )
 
+    @property
     def id(self):
         """
         Get this train's unique ID
@@ -49,11 +50,12 @@ class Train(BaseModel, ManyFleetsMixin, ManyBuildsMixin):
 
         return self.train_id
 
-    def _self_url(self):
+    @property
+    def self_url(self):
         """
         The full URL for this train in fl33t
 
         :returns: str
         """
 
-        return '/'.join((self._base_url(), self.train_id))
+        return '/'.join((self.base_url, self.train_id))
