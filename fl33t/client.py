@@ -136,7 +136,7 @@ class Fl33tClient:  # pylint: disable=too-many-public-methods
     @property
     def base_team_url(self):
         """
-        Get the base team URL for this client
+        The base team URL for this fl33t client
 
         :returns: str
         """

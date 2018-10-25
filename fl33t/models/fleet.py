@@ -66,7 +66,7 @@ class Fleet(BaseModel, OneTrainMixin, OneBuildMixin, ManyDevicesMixin):
     @property
     def self_url(self):
         """
-        The full URL for this fleet in fl33t
+        The full URL for this particular fleet in fl33t
 
         :returns: str
         """

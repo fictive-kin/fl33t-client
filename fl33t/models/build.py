@@ -96,7 +96,7 @@ class Build(BaseModel, OneTrainMixin):
     @property
     def self_url(self):
         """
-        The full URL for this build in fl33t
+        The full URL for this particular build in fl33t
 
         :returns: str
         """
@@ -109,7 +109,7 @@ class Build(BaseModel, OneTrainMixin):
     @property
     def base_url(self):
         """
-        Get the base URL for build actions
+        The base URL for build actions
 
         :returns: str
         """

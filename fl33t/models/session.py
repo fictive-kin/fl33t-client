@@ -29,7 +29,11 @@ class Session(BaseModel):
 
     @property
     def priv(self):
-        """Return a human-readable privilege"""
+        """
+        Return a human-readable privilege
+
+        :returns: str
+        """
         if self.admin:
             return 'admin'
         if self.device:
@@ -69,7 +73,7 @@ class Session(BaseModel):
     @property
     def self_url(self):
         """
-        The full URL for this session in fl33t
+        The full URL for this particular session in fl33t
 
         :returns: str
         """

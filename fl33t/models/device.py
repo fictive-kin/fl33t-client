@@ -105,7 +105,7 @@ class Device(BaseModel, OneBuildMixin, OneFleetMixin):
     @property
     def self_url(self):
         """
-        The full URL for this object in fl33t
+        The full URL for this particular device in fl33t
 
         :returns: str
         """

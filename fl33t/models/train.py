@@ -53,7 +53,7 @@ class Train(BaseModel, ManyFleetsMixin, ManyBuildsMixin):
     @property
     def self_url(self):
         """
-        The full URL for this train in fl33t
+        The full URL for this particular train in fl33t
 
         :returns: str
         """

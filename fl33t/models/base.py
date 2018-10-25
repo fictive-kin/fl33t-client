@@ -128,7 +128,7 @@ class BaseModel(ABC):
     @property
     def base_url(self):
         """
-        Build the base URL for actions
+        The base URL for actions
 
         :returns: str
         """
