@@ -26,7 +26,7 @@ Then list all trains, fleets and devices in your account::
             print(fleet)
             for device in fleet.devices():
                 print(device)
-                fw_upgrade = device.upgrade_available()
+                fw_upgrade = device.checkin()
                 if fw_upgrade:
                     print(fw_upgrade)
 

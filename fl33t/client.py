@@ -5,6 +5,7 @@ fl33t Client
 The main client class that is used to interact with fl33t.
 """
 
+import json
 import logging
 import random
 import string
@@ -479,7 +480,7 @@ class Fl33tClient:  # pylint: disable=too-many-public-methods
         raise Fl33tApiException(ENDPOINT_FAILED_MSG.format(
             'device retrieval'))
 
-    def has_upgrade_available(self, device_id, currently_installed_id=None):
+    def device_checkin(self, device_id, currently_installed_id=None):
         """
         Does this device have pending firmware updates?
 
@@ -493,16 +494,18 @@ class Fl33tClient:  # pylint: disable=too-many-public-methods
         :raises Fl33tApiException: if there was a 5xx error returned by fl33t
         """
 
-        url = '/'.join((self.base_team_url, 'device/{}/build'.format(
+        url = '/'.join((self.base_team_url, 'device/{}/checkin'.format(
             device_id)))
 
-        params = None
+        checkin = {}
         if currently_installed_id:
-            params = {
-                'installed_build_id': currently_installed_id
-            }
+            checkin['build_id'] = currently_installed_id
 
-        result = self.get(url, params=params)
+        body = {
+            'checkin': checkin
+        }
+
+        result = self.post(url, data=json.dumps(body))
 
         # No update available.
         if result.status_code == 204:

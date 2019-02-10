@@ -28,7 +28,7 @@ Retrieve all trains/fleets/devices and if there are any upgrades pending::
             print(fleet)
             for device in fleet.devices():
                 print(device)
-                fw_upgrade = device.upgrade_available()
+                fw_upgrade = device.checkin()
                 if fw_upgrade:
                     print(fw_upgrade)
 
