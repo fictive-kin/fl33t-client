@@ -252,7 +252,6 @@ def test_parent_fleet(fl33t_client,
 def test_parent_build(fl33t_client,
                       device_id,
                       fleet_id,
-                      train_id,
                       build_id,
                       device_get_response,
                       fleet_get_response,
@@ -272,8 +271,6 @@ def test_parent_build(fl33t_client,
 
     build_url = '/'.join((
         fl33t_client.base_team_url,
-        'train',
-        train_id,
         'build',
         build_id
     ))

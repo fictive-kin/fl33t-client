@@ -29,8 +29,6 @@ def test_get_build(fl33t_client):
 
     url = '/'.join((
         fl33t_client.base_team_url,
-        'train',
-        train_id,
         'build',
         build_id
     ))
@@ -38,7 +36,7 @@ def test_get_build(fl33t_client):
     with requests_mock.Mocker() as mock:
         mock.get(url, text=json.dumps(build_response))
 
-        obj = fl33t_client.get_build(train_id, build_id)
+        obj = fl33t_client.get_build(build_id)
 
         assert isinstance(obj, Build)
         assert obj.train_id == train_id
@@ -46,12 +44,9 @@ def test_get_build(fl33t_client):
 
 def test_fail_get_build_invalid_id(fl33t_client):
     build_id = 'asdf'
-    train_id = 'fdsa'
 
     url = '/'.join((
         fl33t_client.base_team_url,
-        'train',
-        train_id,
         'build',
         build_id
     ))
@@ -63,5 +58,5 @@ def test_fail_get_build_invalid_id(fl33t_client):
         ])
 
         with pytest.raises(InvalidBuildIdError):
-            fl33t_client.get_build(train_id, build_id)
-            fl33t_client.get_build(train_id, build_id)
+            fl33t_client.get_build(build_id)
+            fl33t_client.get_build(build_id)

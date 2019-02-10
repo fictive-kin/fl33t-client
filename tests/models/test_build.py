@@ -29,8 +29,6 @@ def test_create(fl33t_client, build_id, train_id):
 
     url = '/'.join((
         fl33t_client.base_team_url,
-        'train',
-        train_id,
         'build'
     ))
 
@@ -48,12 +46,10 @@ def test_create(fl33t_client, build_id, train_id):
         assert response.build_id == build_id
 
 
-def test_delete(fl33t_client, build_id, train_id, build_get_response):
+def test_delete(fl33t_client, build_id, build_get_response):
 
     url = '/'.join((
         fl33t_client.base_team_url,
-        'train',
-        train_id,
         'build',
         build_id
     ))
@@ -62,7 +58,7 @@ def test_delete(fl33t_client, build_id, train_id, build_get_response):
         mock.get(url, text=json.dumps(build_get_response))
         mock.delete(url, [{'status_code': 204}])
 
-        obj = fl33t_client.get_build(train_id, build_id)
+        obj = fl33t_client.get_build(build_id)
         assert obj.delete() is True
 
 
@@ -103,9 +99,7 @@ def test_list(fl33t_client, train_id):
 
     url = '/'.join((
         fl33t_client.base_team_url,
-        'train',
-        train_id,
-        'builds'
+        'builds?train_id={}'.format(train_id)
     ))
 
     with requests_mock.Mocker() as mock:
@@ -120,15 +114,13 @@ def test_list(fl33t_client, train_id):
         assert len(objs) == 2
 
 
-def test_update(fl33t_client, train_id, build_id, build_get_response):
+def test_update(fl33t_client, build_id, build_get_response):
 
     update_response = copy.copy(build_get_response)
     update_response['build']['released'] = True
 
     url = '/'.join((
         fl33t_client.base_team_url,
-        'train',
-        train_id,
         'build',
         build_id
     ))
@@ -137,7 +129,7 @@ def test_update(fl33t_client, train_id, build_id, build_get_response):
         mock.get(url, text=json.dumps(build_get_response))
         mock.put(url, text=json.dumps(update_response), status_code=204)
 
-        obj = fl33t_client.get_build(train_id, build_id)
+        obj = fl33t_client.get_build(build_id)
         obj.released = True
 
         response = obj.update()

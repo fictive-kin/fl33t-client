@@ -116,9 +116,7 @@ class Build(BaseModel, OneTrainMixin):
 
         return '/'.join((
             self._client.base_team_url,
-            'train/{}/build'.format(
-                self.train_id
-            )
+            'build'
         ))
 
     def create(self):

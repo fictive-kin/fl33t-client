@@ -37,16 +37,7 @@ class OneBuildMixin:  # pylint: disable=too-few-public-methods
             return None
 
         if not self._build or self.build_id != self._build.build_id:
-            if hasattr(self, 'fleet') and self.fleet.train_id:
-                train_id = self.fleet.train_id
-
-            elif hasattr(self, 'train_id') and self.train_id:
-                train_id = self.train_id
-
-            else:
-                return None
-
-            self._build = self._client.get_build(train_id, self.build_id)
+            self._build = self._client.get_build(self.build_id)
 
         return self._build
 
