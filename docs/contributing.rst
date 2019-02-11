@@ -10,6 +10,17 @@ Anyone is welcome to contribute fixes and enhancements to this project. We use:
 Any pull request that modifies module code and has new functionality that does
 not include tests will be blocked until tests have been written for it.
 
+Contributors
+------------
+
+A big "Thank You!" to those who have made special contributions to this project:
+
+- `fl33t-code`_
+- jperras_
+- markunas_
+
+And thanks to everyone else that has contributed_.
+
 Testing
 -------
 
@@ -49,3 +60,7 @@ to verify that your changes are working before you submit a PR.
 .. _pytest: https://docs.pytest.org/en/latest/
 .. _flake8: http://flake8.pycqa.org/en/latest/
 .. _pylint: https://pylint.readthedocs.io/en/latest/
+.. _fl33t-code: https://github.com/fl33t-code
+.. _jperras: https://github.com/jperras
+.. _markunas: https://github.com/markunas
+.. _contributed: https://github.com/fictivekin/fl33t-client/graphs/contributors
