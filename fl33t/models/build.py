@@ -131,6 +131,10 @@ class Build(BaseModel, OneTrainMixin):
         :raises Fl33tApiException: if there was a 5xx error returned by fl33t
         :raises Fl33tClientException: if the model was instantiated without a
             :py:class:`fl33t.Fl33tClient`
+        :raises NoUploadUrlProvidedError: if the create response from the fl33t
+            API did not include an upload URL
+        :raises BuildUploadError: if an error occurred when uploading the
+            firmware file to the fl33t provided upload URL
         """
 
         if not self._client:
