@@ -114,7 +114,7 @@ class BaseModel(ABC):
 
         :returns: str
         """
-        pass
+        pass  # pylint: disable=unnecessary-pass
 
     @abstractproperty
     def self_url(self):
@@ -123,7 +123,7 @@ class BaseModel(ABC):
 
         :returns: str
         """
-        pass
+        pass  # pylint: disable=unnecessary-pass
 
     @property
     def base_url(self):
