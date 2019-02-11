@@ -5,18 +5,63 @@ import json
 import pytest
 import requests_mock
 
-from fl33t.exceptions import DuplicateDeviceIdError
+from fl33t.exceptions import DuplicateDeviceIdError, Fl33tClientException
 from fl33t.models import Device, Build, Fleet
+
+
+def test_no_device_id():
+    with pytest.raises(ValueError):
+        device = Device()
+
+
+def test_checkin_no_client():
+    device = Device(device_id='asdfasd')
+    with pytest.raises(Fl33tClientException):
+        device.checkin()
+
+
+def test_create_no_client():
+    device = Device(device_id='asdfasd')
+    with pytest.raises(Fl33tClientException):
+        device.create()
+
+
+def test_create_failure(fl33t_client, device_id, fleet_id):
+    name = 'My Device'
+    session_token = 'poiuytrewq'
+    checkin_tstamp = "2018-03-31T22:31:08.836406Z"
+
+    create_response = {}
+
+    url = '{}/team/{}/device'.format(
+            fl33t_client.base_uri, fl33t_client.team_id)
+
+    url = '/'.join((
+        fl33t_client.base_team_url,
+        'device',
+    ))
+
+    with requests_mock.Mocker() as mock:
+        mock.post(url, text=json.dumps(create_response))
+        obj = fl33t_client.Device(
+            device_id=device_id,
+            name=name,
+            fleet_id=fleet_id
+        )
+
+        response = obj.create()
+        assert response == False
 
 
 def test_create(fl33t_client, device_id, fleet_id):
     name = 'My Device'
     session_token = 'poiuytrewq'
+    checkin_tstamp = "2018-03-31T22:31:08.836406Z"
 
     create_response = {
         "device": {
             "build_id": None,
-            "checkin_tstamp": "2018-03-31T22:31:08.836406Z",
+            "checkin_tstamp": checkin_tstamp,
             "device_id": device_id,
             "name": name,
             "fleet_id": fleet_id,
@@ -42,8 +87,23 @@ def test_create(fl33t_client, device_id, fleet_id):
 
         response = obj.create()
         assert isinstance(response, Device)
-        assert response.device_id == device_id
+        assert response.id == device_id
         assert response.session_token == session_token
+        assert str(response) == 'Device {}: {} (Fleet: {}, Build: {})'.format(
+            device_id,
+            name,
+            fleet_id,
+            None
+        )
+        assert repr(response) == ('<Device id={} name={} fleet_id={} build_id={} '
+                'last_seen={}>'.format(
+                    device_id,
+                    name,
+                    fleet_id,
+                    None,
+                    checkin_tstamp
+                    )
+                )
 
 
 def test_delete(fl33t_client, device_id, fleet_id, device_get_response):
@@ -200,7 +260,7 @@ def test_upgrade_not_available(fl33t_client,
         obj = fl33t_client.get_device(device_id)
         assert isinstance(obj, Device)
 
-        build = obj.checkin()
+        build = obj.checkin(installed_build_id='asdf')
         assert isinstance(build, bool)
         assert build is False
 

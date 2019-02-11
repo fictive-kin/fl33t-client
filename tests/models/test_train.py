@@ -10,12 +10,13 @@ from fl33t.models import Train
 def test_create(fl33t_client):
     train_id = 'fdsa'
     name = "My Train's Name"
+    upload_tstamp = "2018-05-30T22:31:08.836406Z"
 
     create_response = {
         "train": {
             "train_id": train_id,
             "name": name,
-            "upload_tstamp": "2018-05-30T22:31:08.836406Z"
+            "upload_tstamp": upload_tstamp
         }
     }
 
@@ -32,7 +33,13 @@ def test_create(fl33t_client):
 
         response = obj.create()
         assert isinstance(response, Train)
-        assert response.train_id == train_id
+        assert response.id == train_id
+        assert str(response) == 'Train {}: {}'.format(train_id, name)
+        assert repr(response) == '<Train id={} name={} latest_build={}>'.format(
+            train_id,
+            name,
+            upload_tstamp
+        )
 
 
 def test_delete(fl33t_client):

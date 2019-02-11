@@ -40,7 +40,14 @@ def test_create(fl33t_client):
         response = obj.create()
         assert isinstance(response, Session)
         assert response.session_token == session_token
+        assert response.id == session_token
         assert response.priv == 'admin'
+        assert str(response) == '{}:{}:{}'.format('api', 'admin', session_token)
+        assert repr(response) == '<Session type={} priv={} token={}>'.format(
+            'api',
+            'admin',
+            session_token
+        )
 
 
 def test_delete(fl33t_client):
@@ -48,7 +55,7 @@ def test_delete(fl33t_client):
 
     get_response = {
         "session": {
-            "admin": True,
+            "admin": False,
             "device": False,
             "provisioning": False,
             "readonly": False,
@@ -69,17 +76,18 @@ def test_delete(fl33t_client):
         mock.delete(url, [{'status_code': 204}])
 
         obj = fl33t_client.get_session(session_token)
+        assert obj.priv == 'unprivileged'
         assert obj.delete() is True
 
 
 def test_list(fl33t_client):
     list_response = {
-        "session_count": 2,
+        "session_count": 3,
         "sessions": [
             {
-                "admin": True,
+                "admin": False,
                 "device": False,
-                "provisioning": False,
+                "provisioning": True,
                 "readonly": False,
                 "session_token": "asdfasdf;lkj",
                 "type": "api",
@@ -93,6 +101,15 @@ def test_list(fl33t_client):
                 "session_token": "fdsafdsajklh",
                 "type": "api",
                 "upload": False
+            },
+            {
+                "admin": False,
+                "device": False,
+                "provisioning": False,
+                "readonly": False,
+                "session_token": "psdfgertkkj",
+                "type": "api",
+                "upload": True
             },
         ]
     }
@@ -109,7 +126,10 @@ def test_list(fl33t_client):
             assert isinstance(obj, Session)
             objs.append(obj)
 
-        assert len(objs) == 2
+        assert len(objs) == 3
+        assert objs[0].priv == 'provisioning'
+        assert objs[1].priv == 'readonly'
+        assert objs[2].priv == 'upload'
 
 
 def test_update(fl33t_client):
@@ -143,6 +163,8 @@ def test_update(fl33t_client):
         mock.put(url, text=json.dumps(update_response), status_code=204)
 
         obj = fl33t_client.get_session(session_token)
+        assert obj.priv == 'device'
+
         obj.admin = True
         obj.device = False
 
