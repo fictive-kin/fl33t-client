@@ -57,7 +57,7 @@ class Device(BaseModel, OneBuildMixin, OneFleetMixin):
 
         return self.device_id
 
-    def upgrade_available(self, installed_build_id=None):
+    def checkin(self, installed_build_id=None):
         """
         Returns the available firmware update, if there is one
 
@@ -78,7 +78,7 @@ class Device(BaseModel, OneBuildMixin, OneFleetMixin):
         if not installed_build_id and self.build_id:
             installed_build_id = self.build_id
 
-        return self._client.has_upgrade_available(
+        return self._client.device_checkin(
             self.device_id,
             currently_installed_id=installed_build_id
         )

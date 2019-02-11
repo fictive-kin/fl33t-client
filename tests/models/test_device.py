@@ -166,16 +166,16 @@ def test_upgrade_available(fl33t_client,
         device_id
     ))
 
-    build_url = '/'.join((url, 'build'))
+    checkin_url = '/'.join((url, 'checkin'))
 
     with requests_mock.Mocker() as mock:
         mock.get(url, text=json.dumps(device_get_response))
-        mock.get(build_url, text=json.dumps(upgrade_response))
+        mock.post(checkin_url, text=json.dumps(upgrade_response))
 
         obj = fl33t_client.get_device(device_id)
         assert isinstance(obj, Device)
 
-        build = obj.upgrade_available()
+        build = obj.checkin()
         assert isinstance(build, Build)
         assert build.train_id == train_id
 
@@ -191,16 +191,16 @@ def test_upgrade_not_available(fl33t_client,
         device_id
     ))
 
-    build_url = '/'.join((url, 'build'))
+    checkin_url = '/'.join((url, 'checkin'))
 
     with requests_mock.Mocker() as mock:
         mock.get(url, text=json.dumps(device_get_response))
-        mock.get(build_url, status_code=204)
+        mock.post(checkin_url, status_code=204)
 
         obj = fl33t_client.get_device(device_id)
         assert isinstance(obj, Device)
 
-        build = obj.upgrade_available()
+        build = obj.checkin()
         assert isinstance(build, bool)
         assert build is False
 
@@ -252,7 +252,6 @@ def test_parent_fleet(fl33t_client,
 def test_parent_build(fl33t_client,
                       device_id,
                       fleet_id,
-                      train_id,
                       build_id,
                       device_get_response,
                       fleet_get_response,
@@ -272,8 +271,6 @@ def test_parent_build(fl33t_client,
 
     build_url = '/'.join((
         fl33t_client.base_team_url,
-        'train',
-        train_id,
         'build',
         build_id
     ))

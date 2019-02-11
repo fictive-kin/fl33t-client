@@ -5,6 +5,7 @@ fl33t Client
 The main client class that is used to interact with fl33t.
 """
 
+import json
 import logging
 import random
 import string
@@ -322,7 +323,7 @@ class Fl33tClient:  # pylint: disable=too-many-public-methods
         url = "/".join((self.base_team_url, 'sessions'))
         params = self._build_offset_limit(offset=offset, limit=limit)
 
-        single_page = False if offset is None else True
+        single_page = False if offset is None and limit is None else True
         return self._paginator(
             single_page,
             url,
@@ -398,11 +399,10 @@ class Fl33tClient:  # pylint: disable=too-many-public-methods
         raise Fl33tApiException(ENDPOINT_FAILED_MSG.format(
             'fleet retrieval'))
 
-    def get_build(self, train_id, build_id):
+    def get_build(self, build_id):
         """
         Return information about a specific build
 
-        :param str train_id: The train ID that owns the provided build ID
         :param str build_id: The build ID to retrieve information for
         :returns: :py:class:`fl33t.models.Build`
         :raises InvalidBuildIdError: if the build does not exist
@@ -411,13 +411,13 @@ class Fl33tClient:  # pylint: disable=too-many-public-methods
         :raises Fl33tApiException: if there was a 5xx error returned by fl33t
         """
 
-        url = "/".join((self.base_team_url, 'train/{}/build/{}'.format(
-            train_id, build_id)))
+        url = "/".join((self.base_team_url, 'build/{}'.format(
+            build_id)))
 
         result = self.get(url)
 
         if result.status_code in (400, 404):
-            raise InvalidBuildIdError('train={}:{}'.format(train_id, build_id))
+            raise InvalidBuildIdError(build_id)
 
         if 'build' in result.json():
             build = result.json()['build']
@@ -480,7 +480,7 @@ class Fl33tClient:  # pylint: disable=too-many-public-methods
         raise Fl33tApiException(ENDPOINT_FAILED_MSG.format(
             'device retrieval'))
 
-    def has_upgrade_available(self, device_id, currently_installed_id=None):
+    def device_checkin(self, device_id, currently_installed_id=None):
         """
         Does this device have pending firmware updates?
 
@@ -494,16 +494,18 @@ class Fl33tClient:  # pylint: disable=too-many-public-methods
         :raises Fl33tApiException: if there was a 5xx error returned by fl33t
         """
 
-        url = '/'.join((self.base_team_url, 'device/{}/build'.format(
+        url = '/'.join((self.base_team_url, 'device/{}/checkin'.format(
             device_id)))
 
-        params = None
+        checkin = {}
         if currently_installed_id:
-            params = {
-                'installed_build_id': currently_installed_id
-            }
+            checkin['build_id'] = currently_installed_id
 
-        result = self.get(url, params=params)
+        body = {
+            'checkin': checkin
+        }
+
+        result = self.post(url, data=json.dumps(body))
 
         # No update available.
         if result.status_code == 204:
@@ -543,7 +545,7 @@ class Fl33tClient:  # pylint: disable=too-many-public-methods
         if train_id:
             params['train_id'] = train_id
 
-        single_page = False if offset is None else True
+        single_page = False if offset is None and limit is None else True
         return self._paginator(
             single_page,
             url,
@@ -574,7 +576,7 @@ class Fl33tClient:  # pylint: disable=too-many-public-methods
         url = "/".join((self.base_team_url, 'trains'))
         params = self._build_offset_limit(offset=offset, limit=limit)
 
-        single_page = False if offset is None else True
+        single_page = False if offset is None and limit is None else True
         return self._paginator(
             single_page,
             url,
@@ -610,7 +612,7 @@ class Fl33tClient:  # pylint: disable=too-many-public-methods
         if fleet_id:
             params['fleet_id'] = fleet_id
 
-        single_page = False if offset is None else True
+        single_page = False if offset is None and limit is None else True
         return self._paginator(
             single_page,
             url,
@@ -639,13 +641,13 @@ class Fl33tClient:  # pylint: disable=too-many-public-methods
         :raises Fl33tApiException: if there was a 5xx error returned by fl33t
         """
 
-        url = "/".join((self.base_team_url, 'train/{}/builds'.format(
-            train_id)))
+        url = "/".join((self.base_team_url, 'builds'))
         params = self._build_offset_limit(offset=offset, limit=limit)
+        params['train_id'] = train_id
         if version:
             params['version'] = version
 
-        single_page = False if offset is None else True
+        single_page = False if offset is None and limit is None else True
         return self._paginator(
             single_page,
             url,
