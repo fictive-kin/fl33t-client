@@ -4,6 +4,18 @@ Exceptions
 All exceptions used by the fl33t client
 """
 
+# pylint: disable=unnecessary-pass
+
+
+class NoUploadUrlProvidedError(Exception):
+    """The fl33t API failed to return an upload URL for a new build."""
+    pass
+
+
+class BuildUploadError(Exception):
+    """An error occured uploading the firmware file for a build."""
+    pass
+
 
 class DuplicateDeviceIdError(Exception):
     """A device by that ID already exists in fl33t."""
