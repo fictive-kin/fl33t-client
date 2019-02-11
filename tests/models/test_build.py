@@ -2,9 +2,119 @@
 import copy
 import datetime
 import json
+import pytest
 import requests_mock
 
+from fl33t.exceptions import (
+    Fl33tClientException,
+    BuildUploadError,
+    NoUploadUrlProvidedError
+)
 from fl33t.models import Build, Train
+
+
+def test_create_no_client():
+    build = Build()
+    with pytest.raises(Fl33tClientException):
+        build.create()
+
+
+def test_create_failure(fl33t_client, build_id, train_id):
+    version = '0.1.4'
+    upload_url = "https://builds.example.com/some/build/path"
+
+    create_response = {}
+
+    url = '/'.join((
+        fl33t_client.base_team_url,
+        'build'
+    ))
+
+    with requests_mock.Mocker() as mock:
+        mock.post(url, text=json.dumps(create_response))
+        obj = fl33t_client.Build(
+            train_id=train_id,
+            version=version,
+            filename=__file__
+        )
+
+        response = obj.create()
+        assert response == False
+
+
+def test_create_no_upload_url(fl33t_client, build_id, train_id):
+    version = '0.1.4'
+    upload_url = "https://builds.example.com/some/build/path"
+
+    create_response = {
+        "build": {
+            "build_id": build_id,
+            "download_url": None,
+            "filename": None,
+            "md5sum": "14758f1afd44c09b7992073ccf00b43d",
+            "released": False,
+            "size": None,
+            "status": "created",
+            "train_id": train_id,
+            "upload_tstamp": None,
+            "upload_url": None,
+            "version": version
+        }
+    }
+
+    url = '/'.join((
+        fl33t_client.base_team_url,
+        'build'
+    ))
+
+    with requests_mock.Mocker() as mock:
+        mock.post(url, text=json.dumps(create_response))
+        obj = fl33t_client.Build(
+            train_id=train_id,
+            version=version,
+            filename=__file__
+        )
+
+        with pytest.raises(NoUploadUrlProvidedError):
+            response = obj.create()
+
+
+def test_create_upload_failure(fl33t_client, build_id, train_id):
+    version = '0.1.4'
+    upload_url = "https://builds.example.com/some/build/path"
+
+    create_response = {
+        "build": {
+            "build_id": build_id,
+            "download_url": None,
+            "filename": None,
+            "md5sum": "14758f1afd44c09b7992073ccf00b43d",
+            "released": False,
+            "size": None,
+            "status": "created",
+            "train_id": train_id,
+            "upload_tstamp": None,
+            "upload_url": upload_url,
+            "version": version
+        }
+    }
+
+    url = '/'.join((
+        fl33t_client.base_team_url,
+        'build'
+    ))
+
+    with requests_mock.Mocker() as mock:
+        mock.post(url, text=json.dumps(create_response))
+        mock.put(upload_url, [{'status_code': 500}])
+        obj = fl33t_client.Build(
+            train_id=train_id,
+            version=version,
+            filename=__file__
+        )
+
+        with pytest.raises(BuildUploadError):
+            response = obj.create()
 
 
 def test_create(fl33t_client, build_id, train_id):
@@ -43,7 +153,28 @@ def test_create(fl33t_client, build_id, train_id):
 
         response = obj.create()
         assert isinstance(response, Build)
-        assert response.build_id == build_id
+        assert response.id == build_id
+
+        # Need to use the generated upload_tstamp from the response
+        assert str(response) == ('Build {}: {} (Status: {}, Released: {}, Train: {}, Size: {},'
+                ' Uploaded: {})'.format(
+                    build_id,
+                    version,
+                    'created',
+                    'Unreleased',
+                    train_id,
+                    response.size,
+                    response.upload_tstamp
+                    )
+                )
+        assert repr(response) == ('<Build id={} version={} train_id={} '
+            'uploaded={}>'.format(
+                build_id,
+                version,
+                train_id,
+                response.upload_tstamp
+                )
+            )
 
 
 def test_delete(fl33t_client, build_id, build_get_response):
@@ -105,7 +236,7 @@ def test_list(fl33t_client, train_id):
     with requests_mock.Mocker() as mock:
         mock.get(url, text=json.dumps(list_response))
         objs = []
-        for obj in fl33t_client.list_builds(train_id):
+        for obj in fl33t_client.list_builds(train_id=train_id):
             assert isinstance(obj, Build)
             assert obj.train_id == train_id
             assert isinstance(obj.upload_tstamp, datetime.datetime)

@@ -49,6 +49,7 @@ class Fl33tClient:  # pylint: disable=too-many-public-methods
     def __init__(self,
                  team_id,
                  session_token,
+                 *,
                  base_uri=None,
                  generated_id_length=None,
                  default_query_limit=None):
@@ -143,7 +144,7 @@ class Fl33tClient:  # pylint: disable=too-many-public-methods
         """
         return '/'.join((self.base_uri, 'team/{}'.format(self.team_id)))
 
-    def _build_offset_limit(self, offset=None, limit=None):
+    def _build_offset_limit(self, *, offset=None, limit=None):
         """
         Get the offset/limit query params allowing defaults
 
@@ -303,7 +304,7 @@ class Fl33tClient:  # pylint: disable=too-many-public-methods
 
         return result
 
-    def list_sessions(self, offset=None, limit=None):
+    def list_sessions(self, *, offset=None, limit=None):
         """
         List API Sessions
 
@@ -321,11 +322,11 @@ class Fl33tClient:  # pylint: disable=too-many-public-methods
         :raises Fl33tApiException: if there was a 5xx error returned by fl33t
         """
         url = "/".join((self.base_team_url, 'sessions'))
-        params = self._build_offset_limit(offset=offset, limit=limit)
+        params = {}
 
-        single_page = False if offset is None and limit is None else True
         return self._paginator(
-            single_page,
+            offset,
+            limit,
             url,
             params,
             'session',
@@ -480,7 +481,7 @@ class Fl33tClient:  # pylint: disable=too-many-public-methods
         raise Fl33tApiException(ENDPOINT_FAILED_MSG.format(
             'device retrieval'))
 
-    def device_checkin(self, device_id, currently_installed_id=None):
+    def device_checkin(self, device_id, *, currently_installed_id=None):
         """
         Does this device have pending firmware updates?
 
@@ -518,7 +519,7 @@ class Fl33tClient:  # pylint: disable=too-many-public-methods
         raise Fl33tApiException(ENDPOINT_FAILED_MSG.format(
             'device firmware check'))
 
-    def list_fleets(self, train_id=None, offset=None, limit=None):
+    def list_fleets(self, *, train_id=None, offset=None, limit=None):
         """
         Get all fleets from fl33t.
 
@@ -540,14 +541,14 @@ class Fl33tClient:  # pylint: disable=too-many-public-methods
         """
 
         url = "/".join((self.base_team_url, 'fleets'))
-        params = self._build_offset_limit(offset=offset, limit=limit)
+        params = {}
 
         if train_id:
             params['train_id'] = train_id
 
-        single_page = False if offset is None and limit is None else True
         return self._paginator(
-            single_page,
+            offset,
+            limit,
             url,
             params,
             'fleet',
@@ -555,7 +556,7 @@ class Fl33tClient:  # pylint: disable=too-many-public-methods
             'listing fleets'
         )
 
-    def list_trains(self, offset=None, limit=None):
+    def list_trains(self, *, offset=None, limit=None):
         """
         Get all trains from fl33t.
 
@@ -574,11 +575,11 @@ class Fl33tClient:  # pylint: disable=too-many-public-methods
         """
 
         url = "/".join((self.base_team_url, 'trains'))
-        params = self._build_offset_limit(offset=offset, limit=limit)
+        params = {}
 
-        single_page = False if offset is None and limit is None else True
         return self._paginator(
-            single_page,
+            offset,
+            limit,
             url,
             params,
             'train',
@@ -586,7 +587,7 @@ class Fl33tClient:  # pylint: disable=too-many-public-methods
             'listing trains'
         )
 
-    def list_devices(self, fleet_id=None, offset=None, limit=None):
+    def list_devices(self, *, fleet_id=None, offset=None, limit=None):
         """
         Get all devices from fl33t.
 
@@ -608,13 +609,13 @@ class Fl33tClient:  # pylint: disable=too-many-public-methods
         """
 
         url = "/".join((self.base_team_url, 'devices'))
-        params = self._build_offset_limit(offset=offset, limit=limit)
+        params = {}
         if fleet_id:
             params['fleet_id'] = fleet_id
 
-        single_page = False if offset is None and limit is None else True
         return self._paginator(
-            single_page,
+            offset,
+            limit,
             url,
             params,
             'device',
@@ -622,7 +623,12 @@ class Fl33tClient:  # pylint: disable=too-many-public-methods
             'listing devices'
         )
 
-    def list_builds(self, train_id, version=None, offset=None, limit=None):
+    def list_builds(self,
+                    *,
+                    train_id=None,
+                    version=None,
+                    offset=None,
+                    limit=None):
         """
         Get all builds from fl33t by train id.
 
@@ -642,14 +648,15 @@ class Fl33tClient:  # pylint: disable=too-many-public-methods
         """
 
         url = "/".join((self.base_team_url, 'builds'))
-        params = self._build_offset_limit(offset=offset, limit=limit)
-        params['train_id'] = train_id
+        params = {}
+        if train_id:
+            params['train_id'] = train_id
         if version:
             params['version'] = version
 
-        single_page = False if offset is None and limit is None else True
         return self._paginator(
-            single_page,
+            offset,
+            limit,
             url,
             params,
             'build',
@@ -657,8 +664,10 @@ class Fl33tClient:  # pylint: disable=too-many-public-methods
             'listing builds for train {}'.format(train_id)
         )
 
+    # pylint: disable=too-many-locals
     def _paginator(self,
-                   single_page,
+                   offset,
+                   limit,
                    url,
                    params,
                    model_name,
@@ -668,8 +677,14 @@ class Fl33tClient:  # pylint: disable=too-many-public-methods
         """
         Paginate through a specific listing endpoint.
 
-        :param bool single_page: If we should be doing pagination, or simply
-            returning the single page of results.
+        :param offset: If provided, the starting offset for result sets.
+            If not provided, will paginate through *all* records available,
+            effectively ignoring the `limit` parameter. To only retrieve the
+            first page of results, you must specifically set offset to `0`.
+        :type offset: int or None
+        :param limit: If provided, the number of records to return.
+            Defaults to :py:attr:`default_query_limit`
+        :type limit: int or None
         :param str url: The URL to use for the page retrieval
         :param dict params: A :py:`dict` of parameteres to send with the
             request
@@ -688,6 +703,9 @@ class Fl33tClient:  # pylint: disable=too-many-public-methods
         total_count = None
 
         plural_model = '{}s'.format(model_name)
+        params.update(self._build_offset_limit(offset=offset, limit=limit))
+
+        single_page_only = not (offset is None and limit is None)
 
         while True:
             result = self.get(url, params=params)
@@ -701,7 +719,7 @@ class Fl33tClient:  # pylint: disable=too-many-public-methods
                 record_count += 1
                 yield model(client=self, **item)
 
-            if single_page:
+            if single_page_only:
                 break
 
             total_returned = params['offset'] + record_count

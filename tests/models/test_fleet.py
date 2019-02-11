@@ -8,13 +8,14 @@ from fl33t.models import Fleet, Train, Build
 
 def test_create(fl33t_client, fleet_id, train_id):
     name = 'My Devices'
+    size = 5
 
     create_response = {
         "fleet": {
             "build_id": None,
             "fleet_id": fleet_id,
             "name": name,
-            "size": 5,
+            "size": size,
             "train_id": train_id,
             "unreleased": True
         }
@@ -35,7 +36,26 @@ def test_create(fl33t_client, fleet_id, train_id):
 
         response = obj.create()
         assert isinstance(response, Fleet)
-        assert response.fleet_id == fleet_id
+        assert response.id == fleet_id
+        assert str(response) == ('Fleet {}: {} (Train: {}, Status: {}, '
+            'Size: {})'.format(
+                fleet_id,
+                name,
+                train_id,
+                'Unreleased',
+                size
+            )
+        )
+
+        assert repr(response) == ('<Fleet id={} name={} train_id={} '
+            'unreleased={} size={}>'.format(
+                fleet_id,
+                name,
+                train_id,
+                True,
+                size
+            )
+        )
 
 
 def test_delete(fl33t_client, fleet_id, train_id, fleet_get_response):

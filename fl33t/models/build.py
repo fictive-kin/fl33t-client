@@ -9,7 +9,12 @@ import os
 
 import requests
 
-from fl33t.exceptions import Fl33tClientException, InvalidBuildIdError
+from fl33t.exceptions import (
+    Fl33tClientException,
+    BuildUploadError,
+    InvalidBuildIdError,
+    NoUploadUrlProvidedError
+)
 from fl33t.models.base import BaseModel
 from fl33t.models.mixins import OneTrainMixin
 from fl33t.utils import md5
@@ -88,10 +93,7 @@ class Build(BaseModel, OneTrainMixin):
         :returns: str
         """
 
-        return 'train={}:{}'.format(
-            self.train_id,
-            self.build_id
-        )
+        return self.build_id
 
     @property
     def self_url(self):
@@ -129,6 +131,10 @@ class Build(BaseModel, OneTrainMixin):
         :raises Fl33tApiException: if there was a 5xx error returned by fl33t
         :raises Fl33tClientException: if the model was instantiated without a
             :py:class:`fl33t.Fl33tClient`
+        :raises NoUploadUrlProvidedError: if the create response from the fl33t
+            API did not include an upload URL
+        :raises BuildUploadError: if an error occurred when uploading the
+            firmware file to the fl33t provided upload URL
         """
 
         if not self._client:
@@ -150,10 +156,7 @@ class Build(BaseModel, OneTrainMixin):
             setattr(self, key, data[key])
 
         if not self.upload_url:
-            self.logger.exception(
-                'Build creation worked, but no upload_url was'
-                ' provided by fl33t for build: {}'.format(self.version))
-            return self
+            raise NoUploadUrlProvidedError()
 
         # The Content-Disposition header is what sets the filename in fl33t
         headers = {
@@ -172,8 +175,6 @@ class Build(BaseModel, OneTrainMixin):
 
             # Any non-200 status is an error with the upload.
             if not response or response.status_code != 200:
-                self.logger.exception(
-                    'Failed to upload build file: {}'.format(self.version))
-                return False
+                raise BuildUploadError()
 
         return self

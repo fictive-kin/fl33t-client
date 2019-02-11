@@ -8,7 +8,7 @@ Generic
 
 .. autoclass:: fl33t.exceptions.UnprivilegedToken
 
-    :param str url: The URL that access to was forbidden by fl33t
+    :param str url: The URL that access to was forbidden to by fl33t
 
 .. autoclass:: fl33t.exceptions.Fl33tApiException
 
@@ -23,6 +23,10 @@ Model Related
 .. autoclass:: fl33t.exceptions.InvalidDeviceIdError
 
 .. autoclass:: fl33t.exceptions.InvalidBuildIdError
+
+.. autoclass:: fl33t.exceptions.BuildUploadError
+
+.. autoclass:: fl33t.exceptions.NoUploadUrlProvidedError
 
 .. autoclass:: fl33t.exceptions.InvalidFleetIdError
 
