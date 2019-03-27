@@ -40,8 +40,12 @@ if __name__ == "__main__":
             'fl33t.models'
         ],
         install_requires=[
+            'click',
             'python-dateutil',
             'pytz',
             'requests',
+        ],
+        scripts=[
+            'bin/fl33t',
         ],
     )
