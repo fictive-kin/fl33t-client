@@ -9,6 +9,7 @@ import os
 import click
 
 from fl33t import Fl33tClient
+from fl33t.cli.commands.builds import cli as builds_cmds
 from fl33t.cli.commands.devices import cli as devices_cmds
 from fl33t.cli.commands.fleets import cli as fleets_cmds
 from fl33t.cli.commands.trains import cli as trains_cmds
@@ -50,6 +51,7 @@ def cli(ctx, team_id=None, session_token=None):
     ctx.obj['get_fl33t_client'] = lambda: create_client(team_id, session_token)
 
 
+cli.add_command(builds_cmds, name='builds')
 cli.add_command(devices_cmds, name='devices')
 cli.add_command(fleets_cmds, name='fleets')
 cli.add_command(trains_cmds, name='trains')
