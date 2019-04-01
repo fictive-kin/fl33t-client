@@ -1,4 +1,9 @@
 
+v0.6.1: CLI Version
+
+- Adds a command line script for interacting with Fl33t
+- Fixes the missing `name` attribute in the `Session` model
+
 v0.6.0: Fl33t API changes
 
 - PR #7 (Thanks to [@fl33t-code](https://github.com/fl33t-code) for these updates)
