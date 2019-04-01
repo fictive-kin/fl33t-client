@@ -15,10 +15,10 @@ def cli():
 
 @cli.command()
 @click.option('--show-train/--no-show-train', is_flag=True, default=False)
-@click.option('--show-builds/--no-show-builds', is_flag=True, default=False)
+@click.option('--list-builds/--no-list-builds', is_flag=True, default=False)
 @click.option('--list-devices/--no-list-devices', is_flag=True, default=False)
 @click.pass_context
-def list(ctx, show_train, show_builds, list_devices):
+def list(ctx, show_train, list_builds, list_devices):
     """Show information about all fleets"""
 
     for fleet in ctx.obj['get_fl33t_client']().list_fleets():
@@ -27,7 +27,7 @@ def list(ctx, show_train, show_builds, list_devices):
             click.echo('Train:')
             click.echo('    - {}'.format(fleet.train))
 
-        if show_builds:
+        if list_builds:
             click.echo('Builds:')
             for build in fleet.train.builds():
                 click.echo('    - {}'.format(build))
@@ -41,10 +41,10 @@ def list(ctx, show_train, show_builds, list_devices):
 @cli.command()
 @click.argument('fleet_id')
 @click.option('--show-train/--no-show-train', is_flag=True, default=False)
-@click.option('--show-builds/--no-show-builds', is_flag=True, default=False)
+@click.option('--list-builds/--no-list-builds', is_flag=True, default=False)
 @click.option('--list-devices/--no-list-devices', is_flag=True, default=False)
 @click.pass_context
-def show(ctx, fleet_id, show_train, show_builds, list_devices):
+def show(ctx, fleet_id, show_train, list_builds, list_devices):
     """Show information about a single fleet"""
 
     fleet = ctx.obj['get_fl33t_client']().get_fleet(fleet_id)
@@ -53,7 +53,7 @@ def show(ctx, fleet_id, show_train, show_builds, list_devices):
         click.echo('Train:')
         click.echo('    - {}'.format(fleet.train))
 
-    if show_builds:
+    if list_builds:
         click.echo('Builds:')
         for build in fleet.train.builds():
             click.echo('    - {}'.format(build))
@@ -62,3 +62,90 @@ def show(ctx, fleet_id, show_train, show_builds, list_devices):
         click.echo('Devices:')
         for device in fleet.devices():
             click.echo('    - {}'.format(device))
+
+
+@cli.command()
+@click.argument('fleet_id')
+@click.pass_context
+def delete(ctx, fleet_id):
+    """Delete a fleet from Fl33t"""
+
+    fleet = ctx.obj['get_fl33t_client']().get_fleet(fleet_id)
+    if not fleet:
+        click.echo('Fleet does not exist in Fl33t. Cannot proceed with deletion')
+        return
+
+    if fleet.delete():
+        click.echo('Fleet was deleted.')
+    else:
+        click.echo('Fleet failed to be deleted.')
+
+
+@cli.command()
+@click.argument('name')
+@click.option('--train-id', prompt=True, type=str)
+@click.option('--build-id', prompt=True, type=str)
+@click.option('--unreleased/--only-released', is_flag=True, default=False)
+@click.pass_context
+def create(ctx, name, train_id, build_id, unreleased):
+    """Add a fleet to Fl33t"""
+
+    fleet = ctx.obj['get_fl33t_client']().get_fleet(fleet_id)
+    if fleet:
+        click.echo('Fleet already exists in Fl33t. Cannot proceed with creation.')
+        click.echo(fleet)
+        return
+
+    fleet = ctx.obj['get_fl33t_client']().fleet(
+        name=name,
+        train_id=train_id,
+        build_id=build_id,
+        unreleased=unreleased,
+    )
+
+    if fleet.create():
+        click.echo('Fleet was created.')
+    else:
+        click.echo('Fleet failed to be created.')
+
+
+@cli.command()
+@click.argument('fleet_id')
+@click.option('--name', type=str, default=None)
+@click.option('--train-id', type=str, default=None)
+@click.option('--build-id', type=str, default=None)
+@click.option('--unreleased/--only-released', is_flag=True, default=False)
+@click.pass_context
+def update(ctx, fleet_id, name, train_id, build_id, unreleased):
+    """Update a fleet in Fl33t"""
+
+    fleet = ctx.obj['get_fl33t_client']().get_fleet(fleet_id)
+    if not fleet:
+        click.echo('Fleet does not exist in Fl33t. Cannot proceed with modification.')
+        return
+
+    changes = False
+
+    if name and fleet.name != name:
+        fleet.name = name
+        changes = True
+
+    if train_id and fleet.train_id != train_id:
+        fleet.train_id = train_id
+        changes = True
+
+    if build_id and fleet.build_id != build_id:
+        fleet.build_id = build_id
+        changes = True
+
+    if fleet.unreleased != unreleased:
+        fleet.unreleased = unreleased
+        changes = True
+
+    if changes:
+        if fleet.update():
+            click.echo('Fleet has been updated.')
+        else:
+            click.echo('Fleet failed to be updated.')
+    else:
+        click.echo('Fleet is already in sync with desired changes.')
