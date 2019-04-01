@@ -14,9 +14,9 @@ def cli():
 
 
 @cli.command()
-@click.option('--show-train/--no-show-train', is_flag=True, default=False)
-@click.option('--list-builds/--no-list-builds', is_flag=True, default=False)
-@click.option('--list-devices/--no-list-devices', is_flag=True, default=False)
+@click.option('-t', '--show-train', is_flag=True, default=False)
+@click.option('-b', '--list-builds', is_flag=True, default=False)
+@click.option('-d', '--list-devices', is_flag=True, default=False)
 @click.pass_context
 def list(ctx, show_train, list_builds, list_devices):
     """Show information about all fleets"""
@@ -40,9 +40,9 @@ def list(ctx, show_train, list_builds, list_devices):
 
 @cli.command()
 @click.argument('fleet_id')
-@click.option('--show-train/--no-show-train', is_flag=True, default=False)
-@click.option('--list-builds/--no-list-builds', is_flag=True, default=False)
-@click.option('--list-devices/--no-list-devices', is_flag=True, default=False)
+@click.option('-t', '--show-train', is_flag=True, default=False)
+@click.option('-b', '--list-builds', is_flag=True, default=False)
+@click.option('-d', '--list-devices', is_flag=True, default=False)
 @click.pass_context
 def show(ctx, fleet_id, show_train, list_builds, list_devices):
     """Show information about a single fleet"""
@@ -83,9 +83,9 @@ def delete(ctx, fleet_id):
 
 @cli.command()
 @click.argument('name')
-@click.option('--train-id', prompt=True, type=str)
-@click.option('--build-id', prompt=True, type=str)
-@click.option('--unreleased/--only-released', is_flag=True, default=False)
+@click.option('-t', '--train-id', prompt=True, type=str)
+@click.option('-b', '--build-id', prompt=True, type=str)
+@click.option('-u/-r', '--unreleased/--only-released', is_flag=True, default=False)
 @click.pass_context
 def create(ctx, name, train_id, build_id, unreleased):
     """Add a fleet to Fl33t"""
@@ -111,10 +111,10 @@ def create(ctx, name, train_id, build_id, unreleased):
 
 @cli.command()
 @click.argument('fleet_id')
-@click.option('--name', type=str, default=None)
-@click.option('--train-id', type=str, default=None)
-@click.option('--build-id', type=str, default=None)
-@click.option('--unreleased/--only-released', is_flag=True, default=False)
+@click.option('-n', '--name', type=str, default=None)
+@click.option('-t', '--train-id', type=str, default=None)
+@click.option('-b', '--build-id', type=str, default=None)
+@click.option('-u/-r', '--unreleased/--only-released', is_flag=True, default=False)
 @click.pass_context
 def update(ctx, fleet_id, name, train_id, build_id, unreleased):
     """Update a fleet in Fl33t"""

@@ -14,8 +14,8 @@ def cli():
 
 
 @cli.command()
-@click.option('--show-fleet/--no-show-fleet', is_flag=True, default=False)
-@click.option('--list-builds/--no-list-builds', is_flag=True, default=False)
+@click.option('-f', '--show-fleet', is_flag=True, default=False)
+@click.option('-b', '--list-builds', is_flag=True, default=False)
 @click.pass_context
 def list(ctx, show_fleet, list_builds):
     """Show information about all fleets"""
@@ -34,8 +34,8 @@ def list(ctx, show_fleet, list_builds):
 
 @cli.command()
 @click.argument('train_id')
-@click.option('--show-fleet/--no-show-fleet', is_flag=True, default=False)
-@click.option('--list-builds/--no-list-builds', is_flag=True, default=False)
+@click.option('-f', '--show-fleet', is_flag=True, default=False)
+@click.option('-b', '--list-builds', is_flag=True, default=False)
 @click.pass_context
 def show(ctx, train_id, show_fleet, list_builds):
     """Show information about a single fleet"""
@@ -93,7 +93,7 @@ def create(ctx, name):
 
 @cli.command()
 @click.argument('train_id')
-@click.option('--name', type=str, default=None)
+@click.option('-n', '--name', type=str, default=None)
 @click.pass_context
 def update(ctx, train_id, name):
     """Update a train in Fl33t"""

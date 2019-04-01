@@ -42,8 +42,10 @@ def create_client(team_id, session_token):
 
 
 @click.group()
-@click.option('--team-id', type=str)
-@click.option('--session-token', type=str)
+@click.option('-T', '--team-id', type=str,
+    help="Taken from environment variable 'FL33T_TEAM_ID', if not provided.")
+@click.option('-S', '--session-token', type=str,
+    help="Taken from environment variable 'FL33T_SESSION_TOKEN', if not provided.")
 @click.pass_context
 def cli(ctx, team_id=None, session_token=None):
     """Commands to interact with the Fl33t API directly"""

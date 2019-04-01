@@ -7,6 +7,11 @@ Command line interaction for Fl33t sessions
 import click
 
 
+TYPES = [
+    'account',
+    'api',
+    'device',
+]
 PRIVILEGES = [
     'admin',
     'device',
@@ -59,15 +64,11 @@ def delete(ctx, session_token):
 
 
 @cli.command()
-@click.option('-p', '--privilege', type=str, prompt=True)
-@click.option('-t', '--type', 'type_', type=str, default='api')
+@click.option('-p', '--privilege', type=click.Choice(PRIVILEGES), prompt=True)
+@click.option('-t', '--type', 'type_', type=click.Choice(TYPES), default='api')
 @click.pass_context
 def create(ctx, privilege, type_):
     """Add a session to Fl33t"""
-
-    if privilege not in PRIVILEGES:
-        click.echo('Invalid option for "privilege". Must be one of: {}'.format(', '.join(PRIVILEGES)))
-        return
 
     session = ctx.obj['get_fl33t_client']().Session(
         type=type_
@@ -82,14 +83,10 @@ def create(ctx, privilege, type_):
 
 @cli.command()
 @click.argument('session_token')
-@click.option('-p', '--privilege', type=str, prompt=True)
+@click.option('-p', '--privilege', type=click.Choice(PRIVILEGES), prompt=True)
 @click.pass_context
 def update(ctx, session_token, privilege):
     """Update a session in Fl33t"""
-
-    if privilege not in PRIVILEGES:
-        click.echo('Invalid option for "privilege". Must be one of: {}'.format(', '.join(PRIVILEGES)))
-        return
 
     session = ctx.obj['get_fl33t_client']().get_session(session_token)
     if not session:

@@ -14,7 +14,7 @@ def cli():
 
 
 @cli.command()
-@click.option('--show-train/--no-show-train', is_flag=True, default=False)
+@click.option('-t', '--show-train', is_flag=True, default=False)
 @click.pass_context
 def list(ctx, show_train):
     """Show information about all builds"""
@@ -29,7 +29,7 @@ def list(ctx, show_train):
 
 @cli.command()
 @click.argument('build_id')
-@click.option('--show-train/--no-show-train', is_flag=True, default=False)
+@click.option('-t', '--show-train', is_flag=True, default=False)
 @click.pass_context
 def show(ctx, build_id, show_train):
     """Show information about a single build"""
@@ -61,10 +61,10 @@ def delete(ctx, build_id):
 
 @cli.command()
 @click.argument('filename')
-@click.option('--version', prompt=True, type=str)
-@click.option('--train-id', prompt=True, type=str)
-@click.option('--released/--unreleased', is_flag=True, default=False)
-@click.option('--md5sum', default=None)
+@click.option('-v', '--version', prompt=True, type=str)
+@click.option('-t', '--train-id', prompt=True, type=str)
+@click.option('-r/-u', '--released/--unreleased', is_flag=True, default=False)
+@click.option('-s', '--md5sum', default=None)
 @click.pass_context
 def create(ctx, filename, version, train_id, released, md5sum):
     """Add a build to Fl33t"""
@@ -91,7 +91,7 @@ def create(ctx, filename, version, train_id, released, md5sum):
 
 @cli.command()
 @click.argument('build_id')
-@click.option('--released/--unreleased', is_flag=True, prompt=True)
+@click.option('-r/-u', '--released/--unreleased', is_flag=True, prompt=True)
 @click.pass_context
 def update(ctx, build_id, released):
     """Update a build in Fl33t"""

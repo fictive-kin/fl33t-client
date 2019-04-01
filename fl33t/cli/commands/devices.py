@@ -14,8 +14,8 @@ def cli():
 
 
 @cli.command()
-@click.option('--show-train/--no-show-train', is_flag=True, default=False)
-@click.option('--show-build/--no-show-build', is_flag=True, default=False)
+@click.option('-t', '--show-train', is_flag=True, default=False)
+@click.option('-b', '--show-build', is_flag=True, default=False)
 @click.pass_context
 def list(ctx, show_train, show_build):
     """Show information about all devices"""
@@ -34,8 +34,8 @@ def list(ctx, show_train, show_build):
 
 @cli.command()
 @click.argument('device_id')
-@click.option('--show-train/--no-show-train', is_flag=True, default=False)
-@click.option('--show-build/--no-show-build', is_flag=True, default=False)
+@click.option('-t', '--show-train', is_flag=True, default=False)
+@click.option('-b', '--show-build', is_flag=True, default=False)
 @click.pass_context
 def show(ctx, device_id, show_train, show_build):
     """Show information about a single device"""
@@ -71,8 +71,8 @@ def delete(ctx, device_id):
 
 @cli.command()
 @click.argument('device_id')
-@click.option('--fleet_id', prompt=True)
-@click.option('--name', prompt=True)
+@click.option('-f', '--fleet_id', prompt=True)
+@click.option('-n', '--name', prompt=True)
 @click.pass_context
 def create(ctx, device_id, fleet_id, name):
     """Add a device to Fl33t"""
@@ -97,8 +97,8 @@ def create(ctx, device_id, fleet_id, name):
 
 @cli.command()
 @click.argument('device_id')
-@click.option('--fleet-id', default=None)
-@click.option('--name', default=None)
+@click.option('-f', '--fleet-id', default=None)
+@click.option('-n', '--name', default=None)
 @click.pass_context
 def update(ctx, device_id, fleet_id, name):
     """Update a device in Fl33t"""
