@@ -22,17 +22,20 @@ def list(ctx, show_train, show_builds, list_devices):
     """Show information about all fleets"""
 
     for fleet in ctx.obj['get_fl33t_client']().list_fleets():
-        print(fleet)
+        click.echo(fleet)
         if show_train:
-            print(fleet.train)
+            click.echo('Train:')
+            click.echo('    - {}'.format(fleet.train))
 
         if show_builds:
+            click.echo('Builds:')
             for build in fleet.train.builds():
-                print(build)
+                click.echo('    - {}'.format(build))
 
         if list_devices:
+            click.echo('Devices:')
             for device in fleet.devices():
-                print(device)
+                click.echo('    - {}'.format(device))
 
 
 @cli.command()
@@ -45,14 +48,17 @@ def show(ctx, fleet_id, show_train, show_builds, list_devices):
     """Show information about a single fleet"""
 
     fleet = ctx.obj['get_fl33t_client']().get_fleet(fleet_id)
-    print(fleet)
+    click.echo(fleet)
     if show_train:
-        print(fleet.train)
+        click.echo('Train:')
+        click.echo('    - {}'.format(fleet.train))
 
     if show_builds:
+        click.echo('Builds:')
         for build in fleet.train.builds():
-            print(build)
+            click.echo('    - {}'.format(build))
 
     if list_devices:
+        click.echo('Devices:')
         for device in fleet.devices():
-            print(device)
+            click.echo('    - {}'.format(device))
