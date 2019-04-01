@@ -18,6 +18,7 @@ class Session(BaseModel):
     _booleans = ['admin', 'device', 'provisioning', 'readonly', 'upload']
 
     _defaults = {
+        'name': '',
         'admin': False,
         'device': False,
         'provisioning': False,
@@ -47,17 +48,17 @@ class Session(BaseModel):
         return 'unprivileged'
 
     def __str__(self):
-        return '{}:{}:{}'.format(
+        return 'Session {} (Type: {} Privilege: {})'.format(
+            self.name,
             self.type,
-            self.priv,
-            self.session_token
+            self.priv
         )
 
     def __repr__(self):
-        return '<Session type={} priv={} token={}>'.format(
+        return '<Session name={} type={} priv={}>'.format(
+            self.name,
             self.type,
-            self.priv,
-            self.session_token
+            self.priv
         )
 
     @property

@@ -18,6 +18,7 @@ classifiers = [
     'Programming Language :: Python :: 3.4',
     'Programming Language :: Python :: 3.5',
     'Programming Language :: Python :: 3.6',
+    'Programming Language :: Python :: 3.7',
     'Topic :: Software Development',
 ]
 
@@ -37,11 +38,16 @@ if __name__ == "__main__":
         python_requires=">=3.4",
         packages=[
             'fl33t',
+            'fl33t.cli'
             'fl33t.models'
         ],
         install_requires=[
+            'click',
             'python-dateutil',
             'pytz',
             'requests',
+        ],
+        scripts=[
+            'bin/fl33t',
         ],
     )
