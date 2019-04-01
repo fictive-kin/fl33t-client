@@ -24,10 +24,12 @@ def list(ctx, show_train, show_build):
         click.echo(device)
 
         if show_train:
-            click.echo(device.train)
+            click.echo('Train:')
+            click.echo('    - {}'.format(device.train))
 
         if show_build:
-            click.echo(device.build)
+            click.echo('Build:')
+            click.echo('    - {}'.format(device.build))
 
 
 @cli.command()
@@ -42,9 +44,11 @@ def show(ctx, device_id, show_train, show_build):
     click.echo(device)
 
     if show_train:
-        click.echo(device.train)
+        click.echo('Train:')
+        click.echo('    - {}'.format(device.train))
 
     if show_build:
+        click.echo('Build:')
         click.echo(device.build)
 
 
