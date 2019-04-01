@@ -54,7 +54,8 @@ def delete(ctx, session_token):
 
     session = ctx.obj['get_fl33t_client']().get_session(session_token)
     if not session:
-        click.echo('Session does not exist in Fl33t. Cannot proceed with deletion')
+        click.echo('Session does not exist in Fl33t. Cannot proceed with '
+                   'deletion.')
         return
 
     if session.delete():
@@ -90,11 +91,12 @@ def update(ctx, session_token, privilege):
 
     session = ctx.obj['get_fl33t_client']().get_session(session_token)
     if not session:
-        click.echo('Session does not exist in Fl33t. Cannot proceed with modification.')
+        click.echo('Session does not exist in Fl33t. Cannot proceed with '
+                   'modification.')
         return
 
     if session.priv != privilege:
-        for priv in PRIVLEGES:
+        for priv in PRIVILEGES:
             setattr(session, priv, (priv == privilege))
 
         if session.update():

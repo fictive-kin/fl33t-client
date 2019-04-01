@@ -50,7 +50,8 @@ def delete(ctx, build_id):
 
     build = ctx.obj['get_fl33t_client']().get_build(build_id)
     if not build:
-        click.echo('Build does not exist in Fl33t. Cannot proceed with deletion')
+        click.echo('Build does not exist in Fl33t. Cannot proceed with '
+                   'deletion.')
         return
 
     if build.delete():
@@ -68,12 +69,6 @@ def delete(ctx, build_id):
 @click.pass_context
 def create(ctx, filename, version, train_id, released, md5sum):
     """Add a build to Fl33t"""
-
-    build = ctx.obj['get_fl33t_client']().get_build(build_id)
-    if build:
-        click.echo('Build already exists in Fl33t. Cannot proceed with creation.')
-        click.echo(build)
-        return
 
     build = ctx.obj['get_fl33t_client']().Build(
         filename=filename,
@@ -98,7 +93,8 @@ def update(ctx, build_id, released):
 
     build = ctx.obj['get_fl33t_client']().get_build(build_id)
     if not build:
-        click.echo('Build does not exist in Fl33t. Cannot proceed with modification.')
+        click.echo('Build does not exist in Fl33t. Cannot proceed with '
+                   'modification.')
         return
 
     if build.released != released:

@@ -60,7 +60,8 @@ def delete(ctx, train_id):
 
     train = ctx.obj['get_fl33t_client']().get_train(train_id)
     if not train:
-        click.echo('Train does not exist in Fl33t. Cannot proceed with deletion')
+        click.echo('Train does not exist in Fl33t. Cannot proceed with '
+                   'deletion.')
         return
 
     if train.delete():
@@ -74,12 +75,6 @@ def delete(ctx, train_id):
 @click.pass_context
 def create(ctx, name):
     """Add a train to Fl33t"""
-
-    train = ctx.obj['get_fl33t_client']().get_train(train_id)
-    if train:
-        click.echo('Train already exists in Fl33t. Cannot proceed with creation.')
-        click.echo(train)
-        return
 
     train = ctx.obj['get_fl33t_client']().Train(
         name=name,
@@ -100,7 +95,8 @@ def update(ctx, train_id, name):
 
     train = ctx.obj['get_fl33t_client']().get_train(train_id)
     if not train:
-        click.echo('Train does not exist in Fl33t. Cannot proceed with modification.')
+        click.echo('Train does not exist in Fl33t. Cannot proceed with '
+                   'modification.')
         return
 
     if name and train.name != name:

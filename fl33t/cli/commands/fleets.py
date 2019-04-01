@@ -72,7 +72,8 @@ def delete(ctx, fleet_id):
 
     fleet = ctx.obj['get_fl33t_client']().get_fleet(fleet_id)
     if not fleet:
-        click.echo('Fleet does not exist in Fl33t. Cannot proceed with deletion')
+        click.echo('Fleet does not exist in Fl33t. Cannot proceed with '
+                   'deletion.')
         return
 
     if fleet.delete():
@@ -85,16 +86,10 @@ def delete(ctx, fleet_id):
 @click.argument('name')
 @click.option('-t', '--train-id', prompt=True, type=str)
 @click.option('-b', '--build-id', prompt=True, type=str)
-@click.option('-u/-r', '--unreleased/--only-released', is_flag=True, default=False)
+@click.option('-u/-r', '--unreleased/--only-released', default=False)
 @click.pass_context
 def create(ctx, name, train_id, build_id, unreleased):
     """Add a fleet to Fl33t"""
-
-    fleet = ctx.obj['get_fl33t_client']().get_fleet(fleet_id)
-    if fleet:
-        click.echo('Fleet already exists in Fl33t. Cannot proceed with creation.')
-        click.echo(fleet)
-        return
 
     fleet = ctx.obj['get_fl33t_client']().Fleet(
         name=name,
@@ -114,14 +109,15 @@ def create(ctx, name, train_id, build_id, unreleased):
 @click.option('-n', '--name', type=str, default=None)
 @click.option('-t', '--train-id', type=str, default=None)
 @click.option('-b', '--build-id', type=str, default=None)
-@click.option('-u/-r', '--unreleased/--only-released', is_flag=True, default=False)
+@click.option('-u/-r', '--unreleased/--only-released', default=False)
 @click.pass_context
 def update(ctx, fleet_id, name, train_id, build_id, unreleased):
     """Update a fleet in Fl33t"""
 
     fleet = ctx.obj['get_fl33t_client']().get_fleet(fleet_id)
     if not fleet:
-        click.echo('Fleet does not exist in Fl33t. Cannot proceed with modification.')
+        click.echo('Fleet does not exist in Fl33t. Cannot proceed with '
+                   'modification.')
         return
 
     changes = False

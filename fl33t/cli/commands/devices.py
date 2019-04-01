@@ -60,7 +60,8 @@ def delete(ctx, device_id):
 
     device = ctx.obj['get_fl33t_client']().get_device(device_id)
     if not device:
-        click.echo('Device does not exist in Fl33t. Cannot proceed with deletion')
+        click.echo('Device does not exist in Fl33t. Cannot proceed with '
+                   'deletion.')
         return
 
     if device.delete():
@@ -79,7 +80,8 @@ def create(ctx, device_id, fleet_id, name):
 
     device = ctx.obj['get_fl33t_client']().get_device(device_id)
     if device:
-        click.echo('Device already exists in Fl33t. Cannot proceed with creation.')
+        click.echo('Device already exists in Fl33t. Cannot proceed with '
+                   'creation.')
         click.echo(device)
         return
 
@@ -105,7 +107,8 @@ def update(ctx, device_id, fleet_id, name):
 
     device = ctx.obj['get_fl33t_client']().get_device(device_id)
     if not device:
-        click.echo('Device does not exist in Fl33t. Cannot proceed with modification.')
+        click.echo('Device does not exist in Fl33t. Cannot proceed with '
+                   'modification.')
         return
 
     changes = False
