@@ -75,7 +75,7 @@ def create(ctx, filename, version, train_id, released, md5sum):
         click.echo(build)
         return
 
-    build = ctx.obj['get_fl33t_client']().build(
+    build = ctx.obj['get_fl33t_client']().Build(
         filename=filename,
         version=version,
         train_id=train_id,

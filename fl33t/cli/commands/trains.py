@@ -81,7 +81,7 @@ def create(ctx, name):
         click.echo(train)
         return
 
-    train = ctx.obj['get_fl33t_client']().train(
+    train = ctx.obj['get_fl33t_client']().Train(
         name=name,
     )
 

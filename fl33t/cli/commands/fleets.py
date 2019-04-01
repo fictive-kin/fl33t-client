@@ -96,7 +96,7 @@ def create(ctx, name, train_id, build_id, unreleased):
         click.echo(fleet)
         return
 
-    fleet = ctx.obj['get_fl33t_client']().fleet(
+    fleet = ctx.obj['get_fl33t_client']().Fleet(
         name=name,
         train_id=train_id,
         build_id=build_id,
