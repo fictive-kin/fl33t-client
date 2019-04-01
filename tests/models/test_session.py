@@ -11,6 +11,7 @@ def test_create(fl33t_client):
 
     create_response = {
         "session": {
+            "name": "My Session Name",
             "admin": True,
             "device": False,
             "provisioning": False,
@@ -29,6 +30,7 @@ def test_create(fl33t_client):
     with requests_mock.Mocker() as mock:
         mock.post(url, text=json.dumps(create_response))
         obj = fl33t_client.Session(
+            name="My Session Name",
             admin=True,
             device=False,
             provisioning=False,
@@ -42,11 +44,15 @@ def test_create(fl33t_client):
         assert response.session_token == session_token
         assert response.id == session_token
         assert response.priv == 'admin'
-        assert str(response) == '{}:{}:{}'.format('api', 'admin', session_token)
-        assert repr(response) == '<Session type={} priv={} token={}>'.format(
+        assert str(response) == 'Session {} (Type: {} Privilege: {})'.format(
+            'My Session Name',
             'api',
-            'admin',
-            session_token
+            'admin'
+        )
+        assert repr(response) == '<Session name={} type={} priv={}>'.format(
+            'My Session Name',
+            'api',
+            'admin'
         )
 
 
@@ -55,6 +61,7 @@ def test_delete(fl33t_client):
 
     get_response = {
         "session": {
+            "name": "My Session Name",
             "admin": False,
             "device": False,
             "provisioning": False,
@@ -85,6 +92,7 @@ def test_list(fl33t_client):
         "session_count": 3,
         "sessions": [
             {
+                "name": "My First Session",
                 "admin": False,
                 "device": False,
                 "provisioning": True,
@@ -94,6 +102,7 @@ def test_list(fl33t_client):
                 "upload": False
             },
             {
+                "name": "My Second Session",
                 "admin": False,
                 "device": False,
                 "provisioning": False,
@@ -103,6 +112,7 @@ def test_list(fl33t_client):
                 "upload": False
             },
             {
+                "name": "My Third Session",
                 "admin": False,
                 "device": False,
                 "provisioning": False,
@@ -138,6 +148,7 @@ def test_update(fl33t_client):
 
     update_response = {
         "session": {
+            "name": "My Session Name",
             "admin": True,
             "device": False,
             "provisioning": False,
@@ -181,6 +192,7 @@ def test_session_json(fl33t_client):
 
     get_response = {
         "session": {
+            "name": "My Session Name",
             "admin": True,
             "device": False,
             "provisioning": False,
