@@ -15,9 +15,9 @@ def cli():
 
 @cli.command()
 @click.option('--show-fleet/--no-show-fleet', is_flag=True, default=False)
-@click.option('--show-builds/--no-show-builds', is_flag=True, default=False)
+@click.option('--list-builds/--no-list-builds', is_flag=True, default=False)
 @click.pass_context
-def list(ctx, show_fleet, show_builds):
+def list(ctx, show_fleet, list_builds):
     """Show information about all fleets"""
 
     for train in ctx.obj['get_fl33t_client']().list_trains():
@@ -26,7 +26,7 @@ def list(ctx, show_fleet, show_builds):
             click.echo('Train:')
             click.echo('    - {}'.format(train.fleet))
 
-        if show_builds:
+        if list_builds:
             click.echo('Builds:')
             for build in train.builds():
                 click.echo('    - {}'.format(build))
@@ -35,9 +35,9 @@ def list(ctx, show_fleet, show_builds):
 @cli.command()
 @click.argument('train_id')
 @click.option('--show-fleet/--no-show-fleet', is_flag=True, default=False)
-@click.option('--show-builds/--no-show-builds', is_flag=True, default=False)
+@click.option('--list-builds/--no-list-builds', is_flag=True, default=False)
 @click.pass_context
-def show(ctx, train_id, show_fleet, show_builds):
+def show(ctx, train_id, show_fleet, list_builds):
     """Show information about a single fleet"""
 
     train = ctx.obj['get_fl33t_client']().get_train(train_id)
@@ -46,7 +46,69 @@ def show(ctx, train_id, show_fleet, show_builds):
         click.echo('Train:')
         click.echo('    - {}'.format(train.fleet))
 
-    if show_builds:
+    if list_builds:
         click.echo('Builds:')
         for build in train.builds():
             click.echo('    - {}'.format(build))
+
+
+@cli.command()
+@click.argument('train_id')
+@click.pass_context
+def delete(ctx, train_id):
+    """Delete a train from Fl33t"""
+
+    train = ctx.obj['get_fl33t_client']().get_train(train_id)
+    if not train:
+        click.echo('Train does not exist in Fl33t. Cannot proceed with deletion')
+        return
+
+    if train.delete():
+        click.echo('Train was deleted.')
+    else:
+        click.echo('Train failed to be deleted.')
+
+
+@cli.command()
+@click.argument('name')
+@click.pass_context
+def create(ctx, name):
+    """Add a train to Fl33t"""
+
+    train = ctx.obj['get_fl33t_client']().get_train(train_id)
+    if train:
+        click.echo('Train already exists in Fl33t. Cannot proceed with creation.')
+        click.echo(train)
+        return
+
+    train = ctx.obj['get_fl33t_client']().train(
+        name=name,
+    )
+
+    if train.create():
+        click.echo('Train was created.')
+    else:
+        click.echo('Train failed to be created.')
+
+
+@cli.command()
+@click.argument('train_id')
+@click.option('--name', type=str, default=None)
+@click.pass_context
+def update(ctx, train_id, name):
+    """Update a train in Fl33t"""
+
+    train = ctx.obj['get_fl33t_client']().get_train(train_id)
+    if not train:
+        click.echo('Train does not exist in Fl33t. Cannot proceed with modification.')
+        return
+
+    if name and train.name != name:
+        train.name = name
+
+        if train.update():
+            click.echo('Train has been updated.')
+        else:
+            click.echo('Train failed to be updated.')
+    else:
+        click.echo('Train is already in sync with desired changes.')
