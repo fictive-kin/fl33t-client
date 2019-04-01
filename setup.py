@@ -38,8 +38,9 @@ if __name__ == "__main__":
         python_requires=">=3.4",
         packages=[
             'fl33t',
-            'fl33t.cli'
-            'fl33t.models'
+            'fl33t.cli',
+            'fl33t.cli.commands',
+            'fl33t.models',
         ],
         install_requires=[
             'click',
