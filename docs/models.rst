@@ -3,6 +3,7 @@ Models
 
 These are the data models in use within the fl33t module.
 
+
 Sessions
 --------
 
@@ -22,6 +23,7 @@ Sessions
         (*default: false*)
     :param bool readonly: Is this session readonly privileged? (*default: false*)
     :param bool upload: Is this session upload privileged? (*default: false*)
+
 
 Fleets and Devices
 ------------------
@@ -58,6 +60,7 @@ Fleets and Devices
     :param checkin_tstamp: The datetime that this device was last seen by fl33t
         (*read-only*)
     :type checkin_tstamp: str, :py:class:`datetime.datetime` or None
+
 
 Trains and Builds
 -----------------

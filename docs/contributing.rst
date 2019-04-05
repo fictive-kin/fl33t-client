@@ -10,6 +10,7 @@ Anyone is welcome to contribute fixes and enhancements to this project. We use:
 Any pull request that modifies module code and has new functionality that does
 not include tests will be blocked until tests have been written for it.
 
+
 Contributors
 ------------
 
@@ -20,6 +21,7 @@ A big "Thank You!" to those who have made special contributions to this project:
 - markunas_
 
 And thanks to everyone else that has contributed_.
+
 
 Testing
 -------
@@ -43,6 +45,7 @@ If it is a requirement only for testing, it should be listed in the
 
 .. note:: Please, ensure that your tests pass before submitting a PR.
 
+
 Documentation
 -------------
 
@@ -55,6 +58,7 @@ preview the documentation, run::
 
 and then open the index file at `<repo>/docs/_build/index.html` in a browser
 to verify that your changes are working before you submit a PR.
+
 
 .. _tox: https://tox.readthedocs.io/en/latest/
 .. _pytest: https://docs.pytest.org/en/latest/

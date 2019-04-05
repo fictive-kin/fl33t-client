@@ -9,6 +9,7 @@ interactions will require that the session token have `admin` privileges, but
 the selection of the specific privilege to assign to this new session token are
 left up to you.
 
+
 Basic Tutorial
 --------------
 
@@ -30,14 +31,20 @@ Then list all trains, fleets and devices in your account::
                 if fw_upgrade:
                     print(fw_upgrade)
 
-Download and install
+
+Download and Install
 --------------------
 
-This package is in the `Python Package Index <http://pypi.org/project/fl33t>`__,
-so ``pip install fl33t`` should be enough.  You can also clone it on `Github
-<http://github.com/fictivekin/fl33t-client>`__.
+This package is in the `Python Package Index`_, thus ``pip install fl33t``
+is all it takes to get setup. If you prefer the latest and greatest, you can
+also clone it directly from Github_.
+
 
 Licensing
 ---------
 
 fl33t is distributed under the MIT License.
+
+
+.. _Python Package Index: https://pypi.org/project/fl33t
+.. _Github: https://github.com/fictivekin/fl33t-client
