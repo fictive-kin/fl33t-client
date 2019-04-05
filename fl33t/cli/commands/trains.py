@@ -13,12 +13,12 @@ def cli():
     pass
 
 
-@cli.command()
+@cli.command(name='list')
 @click.option('-f', '--show-fleet', is_flag=True, default=False)
 @click.option('-b', '--list-builds', is_flag=True, default=False)
 @click.pass_context
-def list(ctx, show_fleet, list_builds):
-    """Show information about all fleets"""
+def list_(ctx, show_fleet, list_builds):
+    """Show information about all trains"""
 
     for train in ctx.obj['get_fl33t_client']().list_trains():
         click.echo(train)
@@ -38,7 +38,7 @@ def list(ctx, show_fleet, list_builds):
 @click.option('-b', '--list-builds', is_flag=True, default=False)
 @click.pass_context
 def show(ctx, train_id, show_fleet, list_builds):
-    """Show information about a single fleet"""
+    """Show information about a single train"""
 
     train = ctx.obj['get_fl33t_client']().get_train(train_id)
     click.echo(train)

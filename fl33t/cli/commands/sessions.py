@@ -27,9 +27,9 @@ def cli():
     pass
 
 
-@cli.command()
+@cli.command(name='list')
 @click.pass_context
-def list(ctx):
+def list_(ctx):
     """Show information about all sessions"""
 
     for session in ctx.obj['get_fl33t_client']().list_sessions():

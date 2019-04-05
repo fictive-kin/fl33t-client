@@ -13,11 +13,11 @@ def cli():
     pass
 
 
-@cli.command()
+@cli.command(name='list')
 @click.option('-t', '--show-train', is_flag=True, default=False)
 @click.option('-b', '--show-build', is_flag=True, default=False)
 @click.pass_context
-def list(ctx, show_train, show_build):
+def list_(ctx, show_train, show_build):
     """Show information about all devices"""
 
     for device in ctx.obj['get_fl33t_client']().list_devices():
