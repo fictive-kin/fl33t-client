@@ -5,6 +5,7 @@ Command line interaction helpers for apps using Click
 """
 
 import os
+import sys
 
 import click
 
@@ -27,18 +28,18 @@ def create_client(team_id, session_token):
     if not session_token:
         session_token = os.environ.get('FL33T_SESSION_TOKEN')
 
-    key = '--'.join((team_id, session_token))
-    if key not in CLIENTS:
-        try:
+    try:
+        key = '--'.join((team_id, session_token))
+        if key not in CLIENTS:
             CLIENTS[key] = Fl33tClient(team_id, session_token)
-        except ValueError:
-            click.echo('ERROR: You must either pass --team-id and '
-                       '--session-token or have')
-            click.echo('FL33T_TEAM_ID and FL33T_SESSION_TOKEN set in your '
-                       'environment.')
-            raise
+        return CLIENTS[key]
 
-    return CLIENTS[key]
+    except (ValueError, TypeError):
+        click.echo('ERROR: You must either pass --team-id and '
+                   '--session-token or have')
+        click.echo('FL33T_TEAM_ID and FL33T_SESSION_TOKEN set in your '
+                   'environment.')
+        sys.exit(1)
 
 
 @click.group()
